@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Events</title>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <style>
+        /* layout */
+        .container { display: flex; height: 100vh; position: relative; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); display: none; z-index: 150; }
+        .container.sidebar-visible .overlay { display: block; }
+        .sidebar {
+            width: 220px; background-color: #D1E9F6; padding: 20px;
+            position: fixed; top: 0; left: 0; height: 100%;
+            transform: translateX(-100%); transition: transform 0.3s ease;
+            z-index: 200; font-family: 'Amasis MT Pro Medium', serif;
+        }
+        .container.sidebar-visible .sidebar { transform: translateX(0); }
+        .headerTitle { display:flex; align-items:center; font-size:1.5rem; margin-bottom:1rem; padding-bottom:.5rem; border-bottom:1px solid #333; color:#333; }
+        .headerIcon { width:24px; height:24px; stroke:#333; margin-right:8px; }
+        .sidebar ul { list-style:none; margin:0; padding:0; }
+        .sidebar ul li { margin:1rem 0; }
+        .link { display:block; padding:8px; border-radius:4px; font-family:'Amasis MT Pro Medium', serif; color:#333; text-decoration:none; }
+        .link:hover { background-color:#B8DFFB; }
+        .mainContent { flex:1; margin-left:0; display:flex; flex-direction:column; transition:margin-left .3s ease; }
+        .container.sidebar-visible .mainContent { margin-left:260px; }
+        .navbar { display:flex; align-items:center; background:#F6EACB; padding:0 20px; height:64px; box-shadow:0 1px 3px rgba(0,0,0,0.1); border-radius:.5rem; z-index:100; }
+        .toggleBtn { background:none; border:none; cursor:pointer; font-size:1.5rem; margin-right:16px; }
+        .pageTitle { flex:1; font-size:1.25rem; font-weight:600; color:#333; }
+        .userIcon { font-size:1.8rem; cursor:pointer; color:#333; }
+        .content { flex:1; padding:20px; background:#fff; overflow-y:auto; justify-content: center; }
+    
+        /* Events Grid */
+        .section-title { text-align: center; font-size: 1.5rem; margin: 40px 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 250px)); gap: 16px; justify-content: center; }
+        .card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; display: flex; flex-direction: column; }
+        .card img { width: 100%; height: 160px; object-fit: cover; }
+        .card-body { padding: 12px; flex: 1; }
+        .card-body h3 { margin: 0 0 8px; font-size: 1.1rem; }
+        .card-body p { margin: 0; color: #555; font-size: 0.9rem; }
+
+        /* Detail Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; }
+        .modal.show { display: flex; }
+        .modal-content { background: #fff; border-radius: 8px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative; }
+        .modal-header { padding: 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h2 { margin: 0; font-size: 1.25rem; }
+        .modal-body { padding: 16px; }
+        .modal-body img { width: 100%; border-radius: 4px; margin-bottom: 12px; }
+        .modal-body p { margin: 0 0 12px; }
+        .close-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+
+        .user-menu-container {
+        position: relative;
+        display: inline-block;
+        }
+
+        #userIcon {
+        font-size: 24px;
+        cursor: pointer;
+        }
+
+        .dropdown-menu {
+        position: absolute;
+        top: 35px;
+        right: 0;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        display: none;
+        z-index: 999;
+        min-width: 120px;
+        }
+
+        .dropdown-menu button {
+        width: 100%;
+        padding: 10px 16px;
+        background-color: transparent;
+        border: none;
+        text-align: left;
+        font-size: 14px;
+        cursor: pointer;
+        }
+
+        .dropdown-menu button:hover {
+        background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="eventsContainer">
+        <div class="overlay" onclick="toggleSidebar()"></div>
+        <aside class="sidebar">
+            <h2 class="headerTitle">
+                <i class="bi bi-hospital headerIcon"></i> DOCTOR
+            </h2>
+            <ul>
+                
+                <li><a href="/src/main/resources/templates/doctor/doctor-dashboard.html" th:href="@{/doctor/dashboard}" class="link">DASHBOARD</a></li>
+                <li><a href="/src/main/resources/templates/doctor/treatment-plans-list.html" th:href="@{/doctor/treatment-plans}" class="link">TREATMENT PLAN MANAGEMENT</a></li>
+                <li><a href="/src/main/resources/templates/appointmentChecking.html" th:href="@{/doctor/appointment}" class="link">APPOINTMENT CHECKING</a></li>
+                <li><a href="/src/main/resources/templates/doctor/event-ads.html" th:href="@{/event-ads}" class="link">EVENT ADVERTISING MANAGEMENT</a></li>
+                <li><a href="/src/main/resources/templates/doctor/events-list.html" th:href="@{/events-list}" class="link">EVENT NEWS</a></li>
+            </ul>
+        </aside>
+
+        <div class="mainContent">
+            <header class="navbar">
+                <button class="toggleBtn" onclick="toggleSidebar()">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h1 class="pageTitle">EVENTS</h1>
+                <div class="user-menu-container">
+                    <i class="bi bi-person-circle userIcon" id="userIcon"></i>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <form action="/logout" method="post" id="logoutForm">
+                            <button type="button" onclick="submitLogout()">Logout</button>
+                        </form>
+                    </div>
+                </div>
+            </header>
+            <section class="content">
+                <h2 class="section-title">Event News</h2>
+                <div class="grid">
+                    <div class="card"
+                         th:each="evt : ${events}"
+                         th:onclick="|openDetail(this)|"
+                         th:data-title="${evt.title}"
+                         th:data-content="${evt.content}"
+                         th:data-image="${evt.image}">
+
+                        <img th:src="${evt.image}"
+                             alt="Event image"
+                             onerror="this.src='https://via.placeholder.com/300x160?text=No+Image'" />
+
+                        <div class="card-body">
+                            <h3 th:text="${evt.title}">Event Title</h3>                          
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal" onclick="closeDetail(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <button class="close-btn" onclick="closeDetail(event)">&#10005;</button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="Event image" onerror="this.src='https://via.placeholder.com/600x300?text=No+Image'" />
+                <p id="modalContent"></p>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function toggleSidebar() {
+            document.getElementById('eventsContainer').classList.toggle('sidebar-visible');
+        }
+        function openDetail(card) {
+            const title = card.getAttribute('data-title');
+            const content = card.getAttribute('data-content');
+            const image = card.getAttribute('data-image');
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').textContent = content;
+            document.getElementById('modalImage').src = image;
+            document.getElementById('detailModal').classList.add('show');
+        }
+        function closeDetail(e) {
+            document.getElementById('detailModal').classList.remove('show');
+        }
+
+        const userIcon = document.getElementById("userIcon");
+        const dropdownMenu = document.getElementById("dropdownMenu");
+
+        userIcon.addEventListener("click", () => {
+            dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+        });
+
+        window.addEventListener("click", (e) => {
+            if (!userIcon.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.style.display = "none";
+            }
+        });
+
+        function submitLogout() {
+            const confirmLogout = confirm("Are you sure you want to log out?");
+            if (confirmLogout) {
+                document.getElementById("logoutForm").submit();
+            }
+        }
+    </script>
+</body>
+</html>

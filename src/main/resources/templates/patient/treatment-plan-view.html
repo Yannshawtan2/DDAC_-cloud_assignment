@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treatment Plan Details - Patient Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link th:href="@{/css/patient-styles.css}" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Include shared sidebar -->
+            <div th:replace="~{patient/sidebar :: patient-sidebar('treatment-plans')}"></div>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-stethoscope me-2"></i>Treatment Plan Details
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/patient/treatment-plans" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Treatment Plans
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Treatment Plan Header -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0" th:text="${treatmentPlan.title}">Diabetes Management Plan</h5>
+                                    <span class="badge fs-6"
+                                          th:classappend="${treatmentPlan.status.name() == 'ACTIVE'} ? 'bg-success' : (${treatmentPlan.status.name() == 'COMPLETED'} ? 'bg-info' : (${treatmentPlan.status.name() == 'PAUSED'} ? 'bg-warning text-dark' : 'bg-danger'))"
+                                          th:text="${treatmentPlan.status.name()}">
+                                        ACTIVE
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6><i class="fas fa-user-md me-2"></i>Doctor Information</h6>
+                                        <p class="mb-1"><strong>Name:</strong> <span th:text="${treatmentPlan.doctor.name}">Dr. Smith</span></p>
+                                        <p class="mb-1"><strong>Email:</strong> <span th:text="${treatmentPlan.doctor.email}">doctor@example.com</span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6><i class="fas fa-calendar me-2"></i>Treatment Timeline</h6>
+                                        <p class="mb-1">
+                                            <strong>Created:</strong> 
+                                            <span th:text="${#temporals.format(treatmentPlan.createdAt, 'MMM dd, yyyy HH:mm')}">Mar 15, 2024 14:30</span>
+                                        </p>
+                                        <p class="mb-1" th:if="${treatmentPlan.startDate != null}">
+                                            <strong>Start Date:</strong> 
+                                            <span th:text="${#temporals.format(treatmentPlan.startDate, 'MMM dd, yyyy HH:mm')}">Mar 20, 2024 09:00</span>
+                                        </p>
+                                        <p class="mb-1" th:if="${treatmentPlan.endDate != null}">
+                                            <strong>End Date:</strong> 
+                                            <span th:text="${#temporals.format(treatmentPlan.endDate, 'MMM dd, yyyy HH:mm')}">Jun 20, 2024 17:00</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Treatment Plan Details -->
+                <div class="row">
+                    <!-- Description -->
+                    <div class="col-md-12 mb-4" th:if="${treatmentPlan.description != null and !treatmentPlan.description.isEmpty()}">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Treatment Description</h6>
+                            </div>
+                            <div class="card-body">
+                                <p th:text="${treatmentPlan.description}" class="mb-0">
+                                    Comprehensive diabetes management plan focusing on diet, exercise, and medication compliance.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Medication -->
+                    <div class="col-md-6 mb-4" th:if="${treatmentPlan.medication != null and !treatmentPlan.medication.isEmpty()}">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-pills me-2"></i>Medications</h6>
+                            </div>
+                            <div class="card-body">
+                                <pre th:text="${treatmentPlan.medication}" class="mb-0 small" style="white-space: pre-wrap; font-family: inherit;">
+Metformin 500mg - Twice daily with meals
+Insulin Glargine 20 units - Once daily at bedtime
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dosage -->
+                    <div class="col-md-6 mb-4" th:if="${treatmentPlan.dosage != null and !treatmentPlan.dosage.isEmpty()}">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-prescription-bottle-alt me-2"></i>Dosage Instructions</h6>
+                            </div>
+                            <div class="card-body">
+                                <pre th:text="${treatmentPlan.dosage}" class="mb-0 small" style="white-space: pre-wrap; font-family: inherit;">
+Morning: 1 tablet with breakfast
+Evening: 1 tablet with dinner
+Insulin: As directed by blood sugar readings
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Frequency -->
+                    <div class="col-md-6 mb-4" th:if="${treatmentPlan.frequency != null and !treatmentPlan.frequency.isEmpty()}">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Frequency & Schedule</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-calendar-day fa-2x text-primary me-3"></i>
+                                    <div>
+                                        <h5 class="mb-1" th:text="${treatmentPlan.frequency}">Twice daily</h5>
+                                        <small class="text-muted">Treatment Frequency</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="col-md-6 mb-4" th:if="${treatmentPlan.instructions != null and !treatmentPlan.instructions.isEmpty()}">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-list-ul me-2"></i>Special Instructions</h6>
+                            </div>
+                            <div class="card-body">
+                                <pre th:text="${treatmentPlan.instructions}" class="mb-0 small" style="white-space: pre-wrap; font-family: inherit;">
+- Take medications with food to reduce stomach upset
+- Monitor blood glucose levels before meals
+- Call immediately if experiencing severe symptoms
+- Schedule follow-up appointment in 4 weeks
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Notes -->
+                    <div class="col-md-12 mb-4" th:if="${treatmentPlan.notes != null and !treatmentPlan.notes.isEmpty()}">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-sticky-note me-2"></i>Doctor's Notes</h6>
+                            </div>
+                            <div class="card-body">
+                                <pre th:text="${treatmentPlan.notes}" class="mb-0 small" style="white-space: pre-wrap; font-family: inherit;">
+Patient has shown good compliance with previous treatments.
+Consider adjusting dosage if blood sugar levels remain elevated after 2 weeks.
+Regular monitoring of kidney function recommended.
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Important Reminders -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning bg-opacity-10">
+                                <h6 class="mb-0 text-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Important Reminders
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 text-center mb-3">
+                                        <i class="fas fa-pills fa-2x text-primary mb-2"></i>
+                                        <h6>Take as Prescribed</h6>
+                                        <small class="text-muted">Follow medication schedule exactly as instructed</small>
+                                    </div>
+                                    <div class="col-md-4 text-center mb-3">
+                                        <i class="fas fa-phone-alt fa-2x text-success mb-2"></i>
+                                        <h6>Report Side Effects</h6>
+                                        <small class="text-muted">Contact your doctor immediately if you experience any adverse reactions</small>
+                                    </div>
+                                    <div class="col-md-4 text-center mb-3">
+                                        <i class="fas fa-calendar-check fa-2x text-info mb-2"></i>
+                                        <h6>Follow-up Appointments</h6>
+                                        <small class="text-muted">Attend all scheduled appointments for monitoring progress</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body text-center py-4">
+                                <h6 class="mb-3">Need Help?</h6>
+                                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                                    <button class="btn btn-primary" disabled>
+                                        <i class="fas fa-comment-medical me-2"></i>Contact Doctor (Coming Soon)
+                                    </button>
+                                    <button class="btn btn-outline-primary" disabled>
+                                        <i class="fas fa-calendar-plus me-2"></i>Schedule Appointment (Coming Soon)
+                                    </button>
+                                    <a href="/patient/treatment-plans" class="btn btn-outline-secondary">
+                                        <i class="fas fa-list me-2"></i>View All Plans
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

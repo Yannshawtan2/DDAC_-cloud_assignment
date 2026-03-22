@@ -1,0 +1,7 @@
+{
+  "httpMethod": "GET",
+  "path": "/diet-plans/stats/patient/4",
+  "headers": {
+    "Content-Type": "application/json"
+  }
+}

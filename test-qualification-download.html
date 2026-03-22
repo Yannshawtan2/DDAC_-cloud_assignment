@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qualification Download Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Qualification File Download Test</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>This page tests the qualification file download functionality.</p>
+                        
+                        <h5>Test Cases:</h5>
+                        <ul>
+                            <li><strong>Valid Request:</strong> <a href="/admin/qualification-requests/1/download" class="btn btn-primary btn-sm">Download File (ID: 1)</a></li>
+                            <li><strong>Invalid Request:</strong> <a href="/admin/qualification-requests/999/download" class="btn btn-warning btn-sm">Test Invalid ID (999)</a></li>
+                        </ul>
+                        
+                        <h5>Expected Behavior:</h5>
+                        <ul>
+                            <li>Valid request should download the license file</li>
+                            <li>Invalid request should return an error message</li>
+                            <li>File should have proper filename and content type</li>
+                        </ul>
+                        
+                        <div class="alert alert-info">
+                            <strong>Note:</strong> This test assumes you have qualification requests in your database. 
+                            If no requests exist, the download will fail with "Request not found" error.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,10 @@
+{
+  "httpMethod": "POST",
+  "path": "/diagnosis-notes",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "queryStringParameters": null,
+  "pathParameters": null,
+  "body": "{\"appointmentId\":1,\"name\":\"John Doe\",\"gender\":\"Male\",\"age\":35,\"appointmentDate\":\"2024-01-15\",\"foreignId\":\"FD123456\",\"height\":175.5,\"weight\":70.2,\"bloodSugarIndex\":5.8,\"diagnosisNote\":\"Patient shows symptoms of mild diabetes. Recommended lifestyle changes and monitoring.\"}"
+} 

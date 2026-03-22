@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Treatment Plan - Doctor Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link th:href="@{/css/dietician-styles.css}" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Include shared sidebar -->
+            <div th:replace="doctor/sidebar :: doctor-sidebar('create-plan')"></div>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-plus me-2"></i>Create Treatment Plan
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/doctor/treatment-plans" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Plans
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Treatment Plan Form -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-clipboard-list me-2"></i>Treatment Plan Details
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/doctor/treatment-plans/save}" th:object="${treatmentPlan}" method="post">
+                                    <input type="hidden" th:field="*{id}">
+                                    
+                                    <!-- Basic Information -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="title" class="form-label">Title *</label>
+                                                <input type="text" class="form-control" th:field="*{title}" id="title" 
+                                                       placeholder="Enter treatment plan title" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="patient" class="form-label">Patient *</label>
+                                                <select class="form-select" th:field="*{patient.id}" id="patient" required>
+                                                    <option value="">Select a patient</option>
+                                                    <option th:each="pat : ${patients}" 
+                                                            th:value="${pat.id}" 
+                                                            th:text="${pat.name + ' (' + pat.email + ')'}">
+                                                        John Doe (john@example.com)
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="mb-3">
+                                                <label for="description" class="form-label">Description</label>
+                                                <textarea class="form-control" th:field="*{description}" id="description" 
+                                                          rows="3" placeholder="Enter treatment plan description"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Status and Dates -->
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label for="status" class="form-label">
+                                                    <i class="fas fa-flag me-2"></i>Status
+                                                </label>
+                                                <select class="form-select" th:field="*{status}" id="status">
+                                                    <option value="ACTIVE">Active</option>
+                                                    <option value="PAUSED">Paused</option>
+                                                    <option value="COMPLETED">Completed</option>
+                                                    <option value="CANCELLED">Cancelled</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label for="startDate" class="form-label">
+                                                    <i class="fas fa-calendar-plus me-2"></i>Start Date
+                                                </label>
+                                                <input type="datetime-local" class="form-control" th:field="*{startDate}" id="startDate">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label for="endDate" class="form-label">
+                                                    <i class="fas fa-calendar-minus me-2"></i>End Date
+                                                </label>
+                                                <input type="datetime-local" class="form-control" th:field="*{endDate}" id="endDate">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Medical Information -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="medication" class="form-label">Medication</label>
+                                                <textarea class="form-control" th:field="*{medication}" id="medication" 
+                                                          rows="4" placeholder="List medications and prescriptions"></textarea>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="dosage" class="form-label">Dosage</label>
+                                                <textarea class="form-control" th:field="*{dosage}" id="dosage" 
+                                                          rows="4" placeholder="Specify dosage instructions"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="frequency" class="form-label">Frequency</label>
+                                                <input type="text" class="form-control" th:field="*{frequency}" id="frequency" 
+                                                       placeholder="e.g., Twice daily, Every 8 hours">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="instructions" class="form-label">Instructions</label>
+                                                <textarea class="form-control" th:field="*{instructions}" id="instructions" 
+                                                          rows="3" placeholder="Special instructions for the patient"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Notes -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="mb-3">
+                                                <label for="notes" class="form-label">Additional Notes</label>
+                                                <textarea class="form-control" th:field="*{notes}" id="notes" 
+                                                          rows="4" placeholder="Any additional notes or observations"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Notes -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="mb-3">
+                                                <label for="notes" class="form-label">
+                                                    <i class="fas fa-sticky-note me-2"></i>Additional Notes
+                                                </label>
+                                                <textarea class="form-control" th:field="*{notes}" id="notes" 
+                                                          rows="4" placeholder="Any additional notes or observations"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Form Actions -->
+                                    <div class="d-flex justify-content-between">
+                                        <a href="/doctor/treatment-plans" class="btn btn-outline-secondary">Cancel</a>
+                                        <button type="submit" class="btn btn-primary">Save Treatment Plan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Section -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-question-circle me-2"></i>Guidelines
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6><i class="fas fa-lightbulb me-2 text-warning"></i>Best Practices</h6>
+                                        <ul class="small text-muted">
+                                            <li>Use clear, descriptive titles</li>
+                                            <li>Include detailed medication instructions</li>
+                                            <li>Set realistic start and end dates</li>
+                                            <li>Document any special considerations</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6><i class="fas fa-info-circle me-2 text-info"></i>Status Meanings</h6>
+                                        <ul class="small text-muted">
+                                            <li><strong>Active:</strong> Currently being followed</li>
+                                            <li><strong>Paused:</strong> Temporarily suspended</li>
+                                            <li><strong>Completed:</strong> Successfully finished</li>
+                                            <li><strong>Cancelled:</strong> Discontinued</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Form validation and enhancement scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-set start date to today if empty
+            const startDateInput = document.getElementById('startDate');
+            if (!startDateInput.value) {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                startDateInput.value = now.toISOString().slice(0, 16);
+            }
+            
+            // Validate end date is after start date
+            const endDateInput = document.getElementById('endDate');
+            startDateInput.addEventListener('change', function() {
+                endDateInput.min = this.value;
+            });
+            
+            // Auto-resize textareas
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,8 @@
+{
+    "httpMethod": "POST",
+    "path": "/treatment-plans",
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "body": "{\"title\":\"Diabetes Management Plan\",\"description\":\"Comprehensive treatment plan for Type 2 diabetes management\",\"patientId\":4,\"doctorId\":3,\"medication\":\"Metformin\",\"dosage\":\"500mg\",\"frequency\":\"Twice daily\",\"instructions\":\"Take with meals. Monitor blood sugar levels daily.\",\"startDate\":\"2024-01-15T00:00:00\",\"endDate\":\"2024-07-15T00:00:00\",\"notes\":\"Patient should follow low-carb diet and exercise regularly.\"}"
+}

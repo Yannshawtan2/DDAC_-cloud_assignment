@@ -1,0 +1,8 @@
+{
+  "httpMethod": "POST",
+  "path": "/quiz/questions",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"questionText\": \"How frequently do you engage in physical exercise or activities?\", \"description\": \"Rate how often you participate in physical activities suitable for diabetes management\", \"section\": \"Physical Activity\", \"createdBy\": \"Diet@email.com\", \"isActive\": true}"
+}

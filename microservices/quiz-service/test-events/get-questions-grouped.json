@@ -1,0 +1,23 @@
+{
+  "resource": "/quiz/questions/grouped",
+  "path": "/quiz/questions/grouped",
+  "httpMethod": "GET",
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "queryStringParameters": {
+    "active": "true"
+  },
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourcePath": "/quiz/questions/grouped",
+    "httpMethod": "GET",
+    "requestId": "test-request-id",
+    "accountId": "123456789012",
+    "stage": "test"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}

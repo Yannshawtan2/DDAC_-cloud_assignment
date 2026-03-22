@@ -1,0 +1,21 @@
+{
+  "resource": "/quiz/questions",
+  "path": "/quiz/questions",
+  "httpMethod": "POST",
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "queryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourcePath": "/quiz/questions",
+    "httpMethod": "POST",
+    "requestId": "test-request-id",
+    "accountId": "123456789012",
+    "stage": "test"
+  },
+  "body": "{\"questionText\":\"How often do you monitor your carbohydrate intake?\",\"description\":\"Rate how consistently you track carbs in your daily meals\",\"section\":\"Diet\",\"createdBy\":\"dietician@example.com\",\"isActive\":true}",
+  "isBase64Encoded": false
+}

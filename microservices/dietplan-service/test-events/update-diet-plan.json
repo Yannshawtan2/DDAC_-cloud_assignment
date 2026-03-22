@@ -1,0 +1,8 @@
+{
+  "httpMethod": "PUT",
+  "path": "/diet-plans/1",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"title\":\"Updated Mediterranean Diet Plan\",\"description\":\"Updated healthy Mediterranean-style diet plan\",\"patientId\":4,\"breakfast\":\"Updated Greek yogurt with berries\",\"lunch\":\"Updated grilled chicken salad\",\"dinner\":\"Updated baked salmon with quinoa\",\"snacks\":\"Updated almonds, fresh fruits\",\"dailyCalories\":1900,\"specialInstructions\":\"Updated instructions: Drink plenty of water\",\"dietaryRestrictions\":\"No dairy allergies\",\"status\":\"ACTIVE\"}"
+}

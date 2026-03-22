@@ -1,0 +1,8 @@
+{
+  "httpMethod": "POST",
+  "path": "/quiz/questions",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"questionText\": \"How often do you monitor your carbohydrate intake throughout the day?\", \"description\": \"Rate how consistently you track and monitor carbohydrates in your daily meals and snacks\", \"section\": \"Diet\", \"createdBy\": \"Diet@email.com\", \"isActive\": true}"
+}

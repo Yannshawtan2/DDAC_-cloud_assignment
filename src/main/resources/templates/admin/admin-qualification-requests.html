@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qualification Requests - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: #D1E9F6;
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            color: #000;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background: #F1D3CE;
+            color: #000;
+            border-radius: 15px 15px 0 0 !important;
+        }
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+            color: #000;
+        }
+        .status-pending { background-color: #F6EACB; color: #000; }
+        .status-approved { background-color: #EECAD5; color: #000; }
+        .status-rejected { background-color: #F1D3CE; color: #000; }
+        .role-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #000;
+        }
+        .role-doctor { background-color: #EECAD5; color: #000; }
+        .role-dietician { background-color: #F1D3CE; color: #000; }
+        .fa-certificate, .fa-clock, .fa-check, .fa-times, .fa-list, .fa-download, .fa-edit, .fa-trash {
+            color: #000 !important;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/admin-header :: adminHeader"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-12 main-content p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-certificate me-2"></i>Qualification Requests</h2>
+                    <div class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="current-time"></span>
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    <i class="fas fa-clock me-2"></i>Pending
+                                </h5>
+                                <h3 class="text-warning" th:text="${pendingRequests.size()}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    <i class="fas fa-check me-2"></i>Approved
+                                </h5>
+                                <h3 class="text-success" th:text="${approvedCount}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    <i class="fas fa-times me-2"></i>Rejected
+                                </h5>
+                                <h3 class="text-danger" th:text="${rejectedCount}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    <i class="fas fa-list me-2"></i>Total
+                                </h5>
+                                <h3 class="text-info" th:text="${allRequests.size()}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending Requests Section -->
+                <div class="card mb-4" th:if="${!pendingRequests.isEmpty()}">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>Pending Requests
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Applicant</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>License Info</th>
+                                        <th>Submitted</th>
+                                        <th>Password Set</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="request : ${pendingRequests}">
+                                        <td>
+                                            <strong th:text="${request.applicantName}"></strong>
+                                        </td>
+                                        <td th:text="${request.applicantEmail}"></td>
+                                        <td>
+                                            <span th:class="'role-badge role-' + ${#strings.toLowerCase(request.requestedRole)}" 
+                                                  th:text="${request.requestedRole}"></span>
+                                        </td>
+                                        <td>
+                                            <small>
+                                                <strong>Number:</strong> <span th:text="${request.licenseNumber}"></span><br>
+                                                <strong>Type:</strong> <span th:text="${request.licenseType}"></span>
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <small th:text="${#temporals.format(request.submittedAt, 'dd/MM/yyyy HH:mm')}"></small>
+                                        </td>
+                                        <td>
+                                            <small th:if="${request.passwordSet}" class="text-success">
+                                                <i class="fas fa-check"></i> Yes
+                                            </small>
+                                            <small th:if="${!request.passwordSet}" class="text-danger">
+                                                <i class="fas fa-times"></i> No
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/admin/qualification-requests/{id}/download(id=${request.id})}" 
+                                                   class="btn btn-sm btn-outline-info" title="Download License">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-success" 
+                                                        onclick="approveRequest(this)" 
+                                                        th:data-id="${request.id}"
+                                                        title="Approve">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" 
+                                                        onclick="rejectRequest(this)" 
+                                                        th:data-id="${request.id}"
+                                                        title="Reject">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All Requests Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>All Requests
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Applicant</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Submitted</th>
+                                        <th>Reviewed</th>
+                                        <th>Password Set</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="request : ${allRequests}">
+                                        <td>
+                                            <strong th:text="${request.applicantName}"></strong>
+                                        </td>
+                                        <td th:text="${request.applicantEmail}"></td>
+                                        <td>
+                                            <span th:class="'role-badge role-' + ${#strings.toLowerCase(request.requestedRole)}" 
+                                                  th:text="${request.requestedRole}"></span>
+                                        </td>
+                                        <td>
+                                            <span th:class="'status-badge status-' + ${#strings.toLowerCase(request.status)}" 
+                                                  th:text="${request.status}"></span>
+                                        </td>
+                                        <td>
+                                            <small th:text="${#temporals.format(request.submittedAt, 'dd/MM/yyyy HH:mm')}"></small>
+                                        </td>
+                                        <td>
+                                            <small th:if="${request.reviewedAt != null}" 
+                                                   th:text="${#temporals.format(request.reviewedAt, 'dd/MM/yyyy HH:mm')}"></small>
+                                            <small th:if="${request.reviewedAt == null}" class="text-muted">-</small>
+                                        </td>
+                                        <td>
+                                            <small th:if="${request.passwordSet}" class="text-success">
+                                                <i class="fas fa-check"></i> Yes
+                                            </small>
+                                            <small th:if="${!request.passwordSet}" class="text-danger">
+                                                <i class="fas fa-times"></i> No
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/admin/qualification-requests/{id}/download(id=${request.id})}" 
+                                                   class="btn btn-sm btn-outline-info" title="Download License">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-danger" 
+                                                        onclick="deleteRequest(this)" 
+                                                        th:data-id="${request.id}"
+                                                        title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approve Request Modal -->
+    <div class="modal fade" id="approveModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Approve Qualification Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="approveForm" method="post">
+                    <div class="modal-body">
+                        <p>Are you sure you want to approve this qualification request? This will create a user account for the applicant.</p>
+                        <div class="mb-3">
+                            <label for="approveNotes" class="form-label">Admin Notes (Optional)</label>
+                            <textarea class="form-control" id="approveNotes" name="adminNotes" rows="3" 
+                                      placeholder="Add any notes about the approval..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Approve Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Request Modal -->
+    <div class="modal fade" id="rejectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reject Qualification Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="rejectForm" method="post">
+                    <div class="modal-body">
+                        <p>Are you sure you want to reject this qualification request?</p>
+                        <div class="mb-3">
+                            <label for="rejectNotes" class="form-label">Rejection Reason (Required)</label>
+                            <textarea class="form-control" id="rejectNotes" name="adminNotes" rows="3" 
+                                      placeholder="Please provide a reason for rejection..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Reject Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Request Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Qualification Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this qualification request? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteForm" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">Delete Request</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString();
+            document.getElementById('current-time').textContent = timeString;
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Approve request
+        function approveRequest(button) {
+            const requestId = button.getAttribute('data-id');
+            const modal = new bootstrap.Modal(document.getElementById('approveModal'));
+            const form = document.getElementById('approveForm');
+            form.action = `/admin/qualification-requests/${requestId}/approve`;
+            modal.show();
+        }
+
+        // Reject request
+        function rejectRequest(button) {
+            const requestId = button.getAttribute('data-id');
+            const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+            const form = document.getElementById('rejectForm');
+            form.action = `/admin/qualification-requests/${requestId}/reject`;
+            modal.show();
+        }
+
+        // Delete request
+        function deleteRequest(button) {
+            const requestId = button.getAttribute('data-id');
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            const form = document.getElementById('deleteForm');
+            form.action = `/admin/qualification-requests/${requestId}/delete`;
+            modal.show();
+        }
+    </script>
+</body>
+</html> 

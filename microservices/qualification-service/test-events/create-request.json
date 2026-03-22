@@ -1,0 +1,40 @@
+{
+  "body": "{\"applicantName\":\"Dr. John Doe\",\"applicantEmail\":\"john.doe@example.com\",\"requestedRole\":\"DOCTOR\",\"licenseNumber\":\"LIC123456\",\"licenseType\":\"Medical License\",\"password\":\"password123\",\"s3FileKey\":\"qualifications/doctor/test-file-key.pdf\",\"originalFilename\":\"license.pdf\",\"fileContentType\":\"application/pdf\"}",
+  "resource": "/{proxy+}",
+  "path": "/qualification-requests",
+  "httpMethod": "POST",
+  "isBase64Encoded": false,
+  "queryStringParameters": null,
+  "multiValueQueryStringParameters": null,
+  "pathParameters": {
+    "proxy": "qualification-requests"
+  },
+  "stageVariables": null,
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+    "Host": "1234567890.execute-api.us-east-1.amazonaws.com"
+  },
+  "multiValueHeaders": {
+    "Accept": ["application/json"],
+    "Content-Type": ["application/json"],
+    "Host": ["1234567890.execute-api.us-east-1.amazonaws.com"]
+  },
+  "requestContext": {
+    "accountId": "123456789012",
+    "resourceId": "123456",
+    "stage": "prod",
+    "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
+    "requestTime": "03/Aug/2025:12:34:56 +0000",
+    "requestTimeEpoch": 1722685496000,
+    "identity": {
+      "sourceIp": "127.0.0.1",
+      "userAgent": "Custom User Agent String"
+    },
+    "path": "/prod/qualification-requests",
+    "resourcePath": "/{proxy+}",
+    "httpMethod": "POST",
+    "apiId": "1234567890",
+    "protocol": "HTTP/1.1"
+  }
+}

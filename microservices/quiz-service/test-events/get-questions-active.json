@@ -1,0 +1,10 @@
+{
+  "httpMethod": "GET",
+  "path": "/quiz/questions",
+  "queryStringParameters": {
+    "active": "true"
+  },
+  "headers": {
+    "Content-Type": "application/json"
+  }
+}

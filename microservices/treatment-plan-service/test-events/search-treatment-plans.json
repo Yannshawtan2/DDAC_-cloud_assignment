@@ -1,0 +1,7 @@
+{
+    "httpMethod": "GET",
+    "path": "/treatment-plans/search?keyword=diabetes&doctorId=3",
+    "headers": {
+        "Content-Type": "application/json"
+    }
+}

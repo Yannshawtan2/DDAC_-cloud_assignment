@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Book Appointment</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/patient-styles.css}" rel="stylesheet">
+    <style>
+        :root {
+            --light-blue: #D1E9F6;
+            --warm-beige: #F6EACB;
+            --soft-coral: #F1D3CE;
+            --dusty-pink: #EECAD5;
+            --text-dark: #2c3e50;
+            --text-muted: #6c757d;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--warm-beige) 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .navbar {
+            background-color: var(--light-blue) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-dark .navbar-brand,
+        .navbar-dark .navbar-nav .nav-link {
+            color: var(--text-dark) !important;
+        }
+
+        .navbar-dark .navbar-nav .nav-link:hover {
+            color: var(--text-muted) !important;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: none;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: var(--light-blue);
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+
+        .card-header h3 {
+            color: var(--text-dark);
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid var(--light-blue);
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--soft-coral);
+            box-shadow: 0 0 0 0.2rem rgba(241, 211, 206, 0.25);
+        }
+
+        .btn-primary {
+            background-color: var(--light-blue) !important;
+            border-color: var(--light-blue) !important;
+            color: var(--text-dark) !important;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 0.5rem 2rem;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--soft-coral) !important;
+            border-color: var(--soft-coral) !important;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--dusty-pink) !important;
+            border-color: var(--dusty-pink) !important;
+            color: var(--text-dark) !important;
+        }
+
+        .btn-secondary:hover {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: #ffffff !important;
+        }
+
+        .time-slot {
+            cursor: pointer;
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid var(--light-blue);
+            border-radius: 8px;
+            min-width: 100px;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: inline-block;
+            background-color: white;
+        }
+
+        .time-slot:hover:not(.unavailable) {
+            background-color: var(--light-blue);
+            color: var(--text-dark);
+            transform: translateY(-2px);
+        }
+
+        .time-slot.selected {
+            background-color: var(--light-blue);
+            color: var(--text-dark);
+            border-color: var(--soft-coral);
+        }
+
+        .time-slot.unavailable {
+            background-color: #f5f5f5;
+            color: var(--text-muted);
+            cursor: not-allowed;
+            border-color: #ddd;
+            opacity: 0.7;
+            text-decoration: line-through;
+        }
+
+        .alert {
+            border-radius: 8px;
+        }
+
+        .alert-success {
+            background-color: var(--light-blue);
+            border-color: var(--light-blue);
+            color: var(--text-dark);
+        }
+
+        .alert-danger {
+            background-color: var(--soft-coral);
+            border-color: var(--soft-coral);
+            color: var(--text-dark);
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid rgba(0,0,0,.15);
+            border-radius: 0.25rem;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            color: #212529;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .doctor-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(0,0,0,.1);
+            transition: background-color 0.2s;
+        }
+
+        .doctor-item:last-child {
+            border-bottom: none;
+        }
+
+        .doctor-item:hover {
+            background-color: var(--light-blue);
+        }
+
+        .dropdown-menu {
+            margin-top: 0.25rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        #timeSlots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--warm-beige) 0%, #ffffff 100%);
+            border: none;
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            border-bottom: 2px solid var(--light-blue);
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: 2px solid var(--light-blue);
+            padding: 1.5rem;
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-book-appointment {
+            background: linear-gradient(135deg, var(--light-blue) 0%, #a3d8f4 100%) !important;
+            border: none !important;
+            color: var(--text-dark) !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .btn-book-appointment:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15) !important;
+            background: linear-gradient(135deg, #a3d8f4 0%, var(--light-blue) 100%) !important;
+        }
+        
+        .btn-book-appointment i {
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Include shared sidebar -->
+            <div th:replace="patient/sidebar :: patient-sidebar('appointment-booking')"></div>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Custom Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-calendar-plus me-2"></i>Book an Appointment
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/patient/appointments" class="btn btn-book-appointment">
+                            <i class="fas fa-calendar-check me-2"></i> View Appointments
+                        </a>
+                    </div>
+                </div>
+                
+                <p class="text-muted mb-4">Schedule a consultation with one of our healthcare professionals</p>
+
+        <!-- Success and Error Messages -->
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            Your appointment has been successfully scheduled!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${param.error[0]}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- User Health Data Summary -->
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <h5 class="mb-3">Your Health Information</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-2">
+                                        <strong>Name:</strong> 
+                                        <span th:text="${user.name}">It's me Mario</span>
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Weight:</strong> 
+                                        <span th:text="${data.weight + ' kg'}">70 kg</span>
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Height:</strong> 
+                                        <span th:text="${data.height + ' cm'}">170 cm</span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-2">
+                                        <strong>Waist:</strong> 
+                                        <span th:text="${data.waistCircumference + ' cm'}">80 cm</span>
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Blood Pressure:</strong> 
+                                        <span th:text="${data.bloodPressure ?: 'Not recorded'}">120/80</span>
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Blood Glucose:</strong> 
+                                        <span th:text="${data.bloodGlucoseLevel != null ? data.bloodGlucoseLevel + ' mmol/L' : 'Not recorded'}">5.5 mmol/L</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form id="appointmentForm" th:action="@{/patient/book-appointment}" method="post">
+                            <div class="mb-3">
+                                <label for="doctorSearch" class="form-label">Doctor Name</label>
+                                <div class="position-relative">
+                                    <input type="text" class="form-control" id="doctorSearch" 
+                                           placeholder="Click to see all doctors or type to search..." 
+                                           autocomplete="off">
+                                    <input type="hidden" id="doctorId" name="doctorId" required>
+                                    <div id="doctorSearchResults" class="dropdown-menu w-100" style="max-height: 250px; overflow-y: auto;"></div>
+                                </div>
+                                <div class="invalid-feedback">Please select a doctor</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="appointmentDate" class="form-label">Preferred Date</label>
+                                <input type="date" class="form-control" id="appointmentDate" name="appointmentDate" required
+                                       th:min="${#temporals.format(#temporals.createNow().plusDays(2), 'yyyy-MM-dd')}"
+                                       th:max="${#temporals.format(#temporals.createNow().plusMonths(3), 'yyyy-MM-dd')}"
+                                       th:value="${defaultDate}">
+                                <div class="form-text">Appointments must be booked at least 2 days in advance, and up to 3 months ahead.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Available Time Slots</label>
+                                <div class="d-flex flex-wrap" id="timeSlots">
+                                    <div class="w-100 text-center text-muted">
+                                        Please select a doctor and date to view available time slots
+                                    </div>
+                                </div>
+                                <input type="hidden" id="selectedTime" name="appointmentTime">
+                                <div class="invalid-feedback">Please select a time slot</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="reason" class="form-label">Reason for Visit</label>
+                                <textarea class="form-control" id="reason" name="reason" rows="3" required
+                                          placeholder="Please describe the reason for your visit"></textarea>
+                                <div class="invalid-feedback">Please provide a reason for your visit</div>
+                            </div>
+
+                            <div class="text-center">
+                                <a href="/patient/dashboard" class="btn me-2" style="background-color: #e9c8d1; color: #333; border: none; padding: 8px 16px; border-radius: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">
+                                    <i class="bi bi-arrow-left"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn" style="background-color: #a8d4e4; color: #333; border: none; padding: 8px 16px; border-radius: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">
+                                    <i class="bi bi-calendar-check"></i> Book Appointment
+                                </button>
+                            </div>
+                            
+                            <style>
+                                /* Override button styles */
+                                .btn-primary {
+                                    background-color: var(--light-blue) !important;
+                                    border-color: var(--light-blue) !important;
+                                    color: var(--text-dark) !important;
+                                    transition: all 0.3s ease;
+                                }
+                                
+                                .btn-primary:hover {
+                                    background-color: var(--soft-coral) !important;
+                                    border-color: var(--soft-coral) !important;
+                                    transform: translateY(-2px);
+                                }
+                                
+                                .btn-secondary {
+                                    background-color: var(--dusty-pink) !important;
+                                    border-color: var(--dusty-pink) !important;
+                                    color: var(--text-dark) !important;
+                                }
+                                
+                                .btn-secondary:hover {
+                                    background-color: #6c757d !important;
+                                    border-color: #6c757d !important;
+                                    color: #ffffff !important;
+                                }
+                            </style>
+
+                            <!-- Add some spacing after the buttons -->
+                            <div class="mt-4 text-center text-muted">
+                                <small>You can schedule appointments up to 3 months in advance</small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Appointment Booked Successfully
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="bi bi-check-circle-fill success-icon"></i>
+                    <p class="mb-0">Your appointment has been booked and is pending for doctor's approval.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" style="background-color: #a8d4e4; color: #333; border: none; padding: 8px 16px; border-radius: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Function to fetch available time slots from server
+        async function fetchAvailableSlots(doctorId, date) {
+            try {
+                const response = await fetch(`/patient/get-available-slots?doctorId=${doctorId}&date=${date}`);
+                if (!response.ok) throw new Error('Failed to fetch time slots');
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching time slots:', error);
+                return [];
+            }
+        }
+
+        // Time slot generation
+        async function generateTimeSlots() {
+            const timeSlotsDiv = document.getElementById('timeSlots');
+            const doctorId = document.getElementById('doctorId').value;
+            const selectedDate = document.getElementById('appointmentDate').value;
+
+            // Clear previous selection
+            document.getElementById('selectedTime').value = '';
+            
+            // Check if both doctor and date are selected
+            if (!doctorId) {
+                timeSlotsDiv.innerHTML = '<div class="w-100 text-center text-muted">Please select a doctor to view available time slots</div>';
+                return;
+            }
+            
+            if (!selectedDate) {
+                timeSlotsDiv.innerHTML = '<div class="w-100 text-center text-muted">Please select a date to view available time slots</div>';
+                return;
+            }
+            
+            timeSlotsDiv.innerHTML = '<div class="w-100 text-center"><div class="spinner-border text-primary" role="status"></div></div>';
+
+            try {
+                const slots = await fetchAvailableSlots(doctorId, selectedDate);
+                
+                if (slots.length === 0) {
+                    timeSlotsDiv.innerHTML = '<div class="w-100 text-center text-muted">No time slots available for this date</div>';
+                    return;
+                }
+
+                timeSlotsDiv.innerHTML = '';
+                slots.forEach(slot => {
+                    const timeSlot = document.createElement('div');
+                    timeSlot.className = 'time-slot';
+                    if (!slot.available) {
+                        timeSlot.className += ' unavailable';
+                        timeSlot.title = 'This time slot is not available';
+                    }
+                    timeSlot.textContent = slot.formatted;
+                    
+                    if (slot.available) {
+                        timeSlot.addEventListener('click', function() {
+                            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                            this.classList.add('selected');
+                            // Ensure time is in HH:mm format for LocalTime.parse()
+                            const [hours, minutes] = slot.time.split(':');
+                            const formattedTime = `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+                            document.getElementById('selectedTime').value = formattedTime;
+                        });
+                    }
+                    
+                    timeSlotsDiv.appendChild(timeSlot);
+                });
+            } catch (error) {
+                timeSlotsDiv.innerHTML = '<div class="w-100 text-center text-danger">Failed to load time slots</div>';
+            }
+        }
+
+        // Update time slots when doctor or date changes
+        document.getElementById('doctorId').addEventListener('change', generateTimeSlots);
+        document.getElementById('appointmentDate').addEventListener('change', generateTimeSlots);
+
+        // Form validation and submission
+        document.getElementById('appointmentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            let isValid = true;
+
+            // Validate doctor selection
+            const doctorInput = document.getElementById('doctorId');
+            if (!doctorInput.value) {
+                doctorInput.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            // Validate time slot
+            const timeInput = document.getElementById('selectedTime');
+            if (!timeInput.value) {
+                document.getElementById('timeSlots').classList.add('is-invalid');
+                isValid = false;
+            }
+
+            // Validate reason
+            const reasonInput = document.getElementById('reason');
+            if (!reasonInput.value.trim()) {
+                reasonInput.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (isValid) {
+                try {
+                    const formData = new FormData(this);
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        try {
+                            const data = await response.json();
+                            if (data.redirect) {
+                                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                                const redirectUrl = data.redirect;
+                                
+                                // Set up redirection on modal close
+                                document.getElementById('successModal').addEventListener('hidden.bs.modal', function () {
+                                    window.location.href = redirectUrl;
+                                }, { once: true }); // Use once: true to ensure the event listener is removed after use
+                                
+                                // Show the modal
+                                successModal.show();
+                                
+                                // Also set up auto-redirect after 5 seconds
+                                setTimeout(() => {
+                                    successModal.hide();
+                                    window.location.href = redirectUrl;
+                                }, 5000);
+                            }
+                        } catch (error) {
+                            console.error('Error parsing response:', error);
+                            alert('An unexpected error occurred. Please try again.');
+                        }
+                    } else {
+                        const errorData = await response.json();
+                        alert(errorData.error || 'Failed to book appointment. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to book appointment. Please try again.');
+                }
+            }
+        });
+
+        // Clear validation states on input
+        document.getElementById('reason').addEventListener('input', function(e) {
+            e.target.classList.remove('is-invalid');
+        });
+
+        document.getElementById('doctorId').addEventListener('input', function(e) {
+            e.target.classList.remove('is-invalid');
+        });
+
+        document.getElementById('timeSlots').addEventListener('click', function() {
+            this.classList.remove('is-invalid');
+        });
+
+        // Doctor search functionality
+        const doctorSearch = document.getElementById('doctorSearch');
+        const resultsDiv = document.getElementById('doctorSearchResults');
+        const doctorIdInput = document.getElementById('doctorId');
+
+        // Clear doctor selection when search input is cleared
+        doctorSearch.addEventListener('input', function(e) {
+            if (!e.target.value.trim()) {
+                doctorIdInput.value = '';
+                doctorSearch.value = '';
+                generateTimeSlots();
+            }
+        });
+
+        async function searchDoctors(query = '') {
+            try {
+                const response = await fetch(`/patient/search-doctors${query ? '?query=' + encodeURIComponent(query) : ''}`);
+                if (!response.ok) throw new Error('Failed to fetch doctors');
+                const doctors = await response.json();
+                
+                resultsDiv.innerHTML = '';
+                if (doctors.length === 0) {
+                    resultsDiv.innerHTML = '<div class="dropdown-item">No doctors found</div>';
+                } else {
+                    doctors.forEach(doctor => {
+                        const item = document.createElement('div');
+                        item.className = 'dropdown-item doctor-item';
+                        item.textContent = doctor.name;
+                        item.addEventListener('click', () => {
+                            doctorSearch.value = doctor.name;
+                            doctorIdInput.value = doctor.id;
+                            resultsDiv.classList.remove('show');
+                            generateTimeSlots();
+                        });
+                        resultsDiv.appendChild(item);
+                    });
+                }
+                resultsDiv.classList.add('show');
+            } catch (error) {
+                console.error('Error searching doctors:', error);
+                resultsDiv.innerHTML = '<div class="dropdown-item text-danger">Error loading doctors</div>';
+                resultsDiv.classList.add('show');
+            }
+        }
+
+        // Show all doctors when clicking the search field
+        doctorSearch.addEventListener('click', () => {
+            if (!resultsDiv.classList.contains('show')) {
+                searchDoctors();
+            }
+        });
+
+        // Handle doctor search input
+        let searchTimeout;
+        doctorSearch.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = e.target.value.trim();
+                searchDoctors(query);
+            }, 300);
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!doctorSearch.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html> 

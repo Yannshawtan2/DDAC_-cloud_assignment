@@ -1,0 +1,7 @@
+{
+  "httpMethod": "DELETE",
+  "path": "/diet-plans/1",
+  "headers": {
+    "Content-Type": "application/json"
+  }
+}

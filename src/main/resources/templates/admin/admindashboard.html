@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - DDac Group 18</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: #D1E9F6;
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            color: #000;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background: #F1D3CE;
+            color: #000;
+            border-radius: 15px 15px 0 0 !important;
+        }
+        .btn-primary {
+            background: #EECAD5;
+            border: none;
+            color: #000;
+        }
+        .btn-primary:hover {
+            background: #F1D3CE;
+            color: #000;
+        }
+        .priority-critical { background-color: #dc3545; color: #000; }
+        .priority-high { background-color: #fd7e14; color: #000; }
+        .priority-medium { background-color: #ffc107; color: #000; }
+        .priority-low { background-color: #28a745; color: #000; }
+        .role-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #000;
+        }
+        .role-admin { background-color: #dc3545; color: #000; }
+        .role-doctor { background-color: #EECAD5; color: #000; }
+        .role-dietician { background-color: #F1D3CE; color: #000; }
+        .role-patient { background-color: #6c757d; color: #000; }
+        .fa-tachometer-alt, .fa-certificate, .fa-users, .fa-edit, .fa-trash, .fa-check-circle, .fa-exclamation-circle, .fa-clock, .fa-eye, .fa-plus {
+            color: #000 !important;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/admin-header :: adminHeader"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-12 main-content p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h2>
+                    <div class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="current-time"></span>
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Toaster Container (Bootstrap 5) -->
+                <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080; min-width: 350px;">
+                    <div th:each="notification : ${notifications}" th:if="${notification.active}" class="toast show mb-2" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 300px;">
+                        <div class="toast-header">
+                            <span th:class="'badge me-2 priority-' + ${#strings.toLowerCase(notification.priority)}" th:text="${notification.priority}"></span>
+                            <strong class="me-auto" th:text="${notification.title}"></strong>
+                            <small th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}"></small>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body" th:text="${notification.message}"></div>
+                    </div>
+                </div>
+
+                <!-- Pending Qualification Requests Section -->
+                <div th:if="${!pendingRequests.isEmpty()}" class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-certificate me-2"></i>Pending Qualification Requests
+                            <span class="badge bg-warning ms-2" th:text="${pendingRequests.size()}"></span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Applicant</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="request : ${pendingRequests}">
+                                        <td>
+                                            <strong th:text="${request.applicantName}"></strong>
+                                        </td>
+                                        <td th:text="${request.applicantEmail}"></td>
+                                        <td>
+                                            <span th:class="'role-badge role-' + ${#strings.toLowerCase(request.requestedRole)}" 
+                                                  th:text="${request.requestedRole}"></span>
+                                        </td>
+                                        <td>
+                                            <small th:text="${#temporals.format(request.submittedAt, 'dd/MM/yyyy HH:mm')}"></small>
+                                        </td>
+                                        <td>
+                                            <a th:href="@{/admin/qualification-requests}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye me-1"></i>Review
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="/admin/qualification-requests" class="btn btn-primary">
+                                <i class="fas fa-certificate me-1"></i>View All Requests
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Management Section -->
+                <div id="user-management" class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users me-2"></i>User Management
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Create User Form -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3">Create New User</h6>
+                                <form th:action="@{/admin/create-user}" method="post" class="row g-3">
+                                    <div class="col-md-3">
+                                        <label for="name" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="password" name="password" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="role" class="form-label">Role</label>
+                                        <select class="form-select" id="role" name="role" required>
+                                            <option value="">Select Role</option>
+                                            <option th:each="role : ${roles}" th:value="${role}" th:text="${role}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">&nbsp;</label>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-plus me-1"></i>Create User
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Users Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="user : ${users}">
+                                        <td th:text="${user.id}"></td>
+                                        <td th:text="${user.name}"></td>
+                                        <td th:text="${user.email}"></td>
+                                        <td>
+                                            <span th:class="'role-badge role-' + ${#strings.toLowerCase(user.role)}" 
+                                                  th:text="${user.role}"></span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1" 
+                                                    onclick="editUser(this)" 
+                                                    th:data-id="${user.id}"
+                                                    th:data-name="${user.name}"
+                                                    th:data-email="${user.email}"
+                                                    th:data-role="${user.role}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <form th:action="@{/admin/delete-user/{id}(id=${user.id})}" method="post" style="display: inline;" 
+                                                  onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString();
+            document.getElementById('current-time').textContent = timeString;
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Edit user function
+        function editUser(button) {
+            const userId = button.getAttribute('data-id');
+            const userName = button.getAttribute('data-name');
+            const userEmail = button.getAttribute('data-email');
+            const userRole = button.getAttribute('data-role');
+            
+            // Populate the modal form
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editUserName').value = userName;
+            document.getElementById('editUserEmail').value = userEmail;
+            document.getElementById('editUserRole').value = userRole;
+            document.getElementById('editUserPassword').value = '';
+            
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+            modal.show();
+        }
+    </script>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit User Information</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/update-user}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="editUserId" name="id">
+                        <div class="mb-3">
+                            <label for="editUserName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="editUserName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editUserEmail" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserRole" class="form-label">Role</label>
+                            <select class="form-select" id="editUserRole" name="role" required>
+                                <option value="">Select Role</option>
+                                <option th:each="role : ${roles}" th:value="${role}" th:text="${role}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserPassword" class="form-label">New Password (leave blank to keep current)</label>
+                            <input type="password" class="form-control" id="editUserPassword" name="password" placeholder="Enter new password or leave blank">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            body {
+                min-height: 100vh;
+                background: #D1E9F6;
+                color: #000;
+            }
+            .card {
+                background: #F6EACB;
+                backdrop-filter: blur(4px);
+                border: none;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            }
+            .btn-primary {
+                background: #EECAD5;
+                border: none;
+                color: #000;
+            }
+            .btn-primary:hover {
+                background: #F1D3CE;
+                color: #000;
+            }
+            .text-primary {
+                color: #000 !important;
+            }
+            .form-control:focus {
+                border-color: #EECAD5;
+                box-shadow: 0 0 0 0.2rem rgba(238,202,213,.15);
+                color: #000;
+            }
+            .bi-person, .bi-envelope, .bi-lock {
+                color: #000 !important;
+            }
+        </style>
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+<div class="d-flex align-items-center justify-content-center" style="min-height:100vh;">
+    <div class="card w-100" style="max-width: 400px;">
+        <div class="card-header text-center pb-2 bg-white border-0">
+            <h2 class="fw-bold text-gray-800">Create Account</h2>
+            <p class="text-muted">Register as a user</p>
+        </div>
+        <div class="card-body">
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            <form th:action="@{/register}" method="post" class="mb-3">
+                <div th:if="${param.error}" class="alert alert-danger">Registration failed. Please try again.</div>
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Your Name" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="you@healthcare.com" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Create a password" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="confirmPassword" class="form-label">Confirm Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+                    </div>
+                </div>
+                <input type="hidden" name="role" value="patient">
+                <button type="submit" class="btn btn-primary w-100">Register</button>
+            </form>
+            <div class="text-center">
+                <p class="text-muted">Already have an account?
+                    <a th:href="@{/login}" class="text-primary fw-medium">Login here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Bootstrap icons (optional) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</body>
+</html>

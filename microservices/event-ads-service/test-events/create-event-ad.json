@@ -1,0 +1,10 @@
+{
+  "httpMethod": "POST",
+  "path": "/event-ads",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "queryStringParameters": null,
+  "pathParameters": null,
+  "body": "{\"title\":\"Health Awareness Workshop\",\"content\":\"Join us for a comprehensive health awareness workshop covering nutrition, exercise, and preventive care.\",\"imageData\":null}"
+} 

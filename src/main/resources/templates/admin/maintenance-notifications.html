@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Notifications - DDac Group 18</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: #D1E9F6;
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            color: #000;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background: #F1D3CE;
+            color: #000;
+            border-radius: 15px 15px 0 0 !important;
+        }
+        .btn-primary {
+            background: #EECAD5;
+            border: none;
+            color: #000;
+        }
+        .btn-primary:hover {
+            background: #F1D3CE;
+            color: #000;
+        }
+        .priority-critical { background-color: #dc3545; color: #000; }
+        .priority-high { background-color: #fd7e14; color: #000; }
+        .priority-medium { background-color: #ffc107; color: #000; }
+        .priority-low { background-color: #28a745; color: #000; }
+        .notification-card {
+            transition: transform 0.2s;
+        }
+        .notification-card:hover {
+            transform: translateY(-2px);
+        }
+        .notification-inactive {
+            opacity: 0.7;
+            background-color: #f8f9fa;
+        }
+        .filter-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: #000;
+        }
+        .stats-card {
+            background: #F1D3CE;
+            color: #000;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .fa-bell, .fa-filter, .fa-plus, .fa-edit, .fa-trash, .fa-play, .fa-pause, .fa-calendar {
+            color: #000 !important;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/admin-header :: adminHeader"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-12 main-content p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-bell me-2"></i>Maintenance Notifications</h2>
+                    <div class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        <span id="current-time"></span>
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h4 th:text="${totalCount}">0</h4>
+                            <p class="mb-0">Total Notifications</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h4 th:text="${activeCount}">0</h4>
+                            <p class="mb-0">Active Notifications</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h4 th:text="${inactiveCount}">0</h4>
+                            <p class="mb-0">Inactive Notifications</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h4 th:text="${criticalCount}">0</h4>
+                            <p class="mb-0">Critical Priority</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters Section -->
+                <div class="filter-section">
+                    <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Filters</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="statusFilter" class="form-label">Status</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="all">All Status</option>
+                                <option value="active">Active Only</option>
+                                <option value="inactive">Inactive Only</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="priorityFilter" class="form-label">Priority</label>
+                            <select class="form-select" id="priorityFilter">
+                                <option value="all">All Priorities</option>
+                                <option value="CRITICAL">Critical</option>
+                                <option value="HIGH">High</option>
+                                <option value="MEDIUM">Medium</option>
+                                <option value="LOW">Low</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="searchFilter" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="searchFilter" placeholder="Search by title or message...">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                                <i class="fas fa-times me-1"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create New Notification Button -->
+                <div class="mb-4">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createNotificationModal">
+                        <i class="fas fa-plus me-2"></i>Create New Notification
+                    </button>
+                </div>
+
+                <!-- Notifications Grid -->
+                <div class="row" id="notificationsContainer">
+                    <div class="col-12" th:each="notification : ${notifications}">
+                        <div th:class="'card notification-card mb-3 ' + (${!notification.active} ? 'notification-inactive' : '')" 
+                             th:data-status="${notification.active ? 'active' : 'inactive'}"
+                             th:data-priority="${notification.priority}"
+                             th:data-title="${notification.title}"
+                             th:data-message="${notification.message}">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <h5 class="card-title mb-0 me-3" th:text="${notification.title}"></h5>
+                                            <span th:class="'badge priority-' + ${#strings.toLowerCase(notification.priority)}" 
+                                                  th:text="${notification.priority}"></span>
+                                            <span th:if="${notification.active}" class="badge bg-success ms-2">Active</span>
+                                            <span th:unless="${notification.active}" class="badge bg-secondary ms-2">Inactive</span>
+                                        </div>
+                                        <p class="card-text text-muted" th:text="${notification.message}"></p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            Created: <span th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                        </small>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <div class="btn-group" role="group">
+                                            <form th:action="@{/admin/activate-notification/{id}(id=${notification.id})}" 
+                                                  method="post" style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-success me-1" 
+                                                        th:unless="${notification.active}">
+                                                    <i class="fas fa-play"></i> Activate
+                                                </button>
+                                            </form>
+                                            <form th:action="@{/admin/deactivate-notification/{id}(id=${notification.id})}" 
+                                                  method="post" style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-warning me-1" 
+                                                        th:if="${notification.active}">
+                                                    <i class="fas fa-pause"></i> Deactivate
+                                                </button>
+                                            </form>
+                                            <form th:action="@{/admin/delete-notification/{id}(id=${notification.id})}" 
+                                                  method="post" style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                        onclick="return confirm('Are you sure you want to delete this notification?')">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                            <button type="button" class="btn btn-sm btn-outline-primary me-1" 
+                                                    data-bs-toggle="modal" 
+                                                    th:attr="data-id=${notification.id},data-title=${notification.title},data-message=${notification.message},data-priority=${notification.priority}"
+                                                    onclick="openEditNotificationModal(this)">
+                                                <i class="fas fa-edit"></i> Update
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Notifications Message -->
+                <div id="noNotifications" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No notifications found</h4>
+                    <p class="text-muted">Try adjusting your filters or create a new notification.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Notification Modal -->
+    <div class="modal fade" id="createNotificationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/create-notification}" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="modalTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="modalTitle" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modalPriority" class="form-label">Priority</label>
+                            <select class="form-select" id="modalPriority" name="priority" required>
+                                <option value="">Select Priority</option>
+                                <option th:each="priority : ${priorities}" th:value="${priority}" th:text="${priority}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modalMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="modalMessage" name="message" rows="4" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Notification</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Notification Modal -->
+    <div class="modal fade" id="editNotificationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/update-notification}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="editNotificationId" name="id">
+                        <div class="mb-3">
+                            <label for="editNotificationTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="editNotificationTitle" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editNotificationPriority" class="form-label">Priority</label>
+                            <select class="form-select" id="editNotificationPriority" name="priority" required>
+                                <option value="">Select Priority</option>
+                                <option th:each="priority : ${priorities}" th:value="${priority}" th:text="${priority}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editNotificationMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="editNotificationMessage" name="message" rows="4" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Notification</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString();
+            document.getElementById('current-time').textContent = timeString;
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Filter functionality
+        function filterNotifications() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+            
+            const notifications = document.querySelectorAll('.notification-card');
+            let visibleCount = 0;
+
+            notifications.forEach(notification => {
+                const status = notification.dataset.status;
+                const priority = notification.dataset.priority;
+                const title = notification.dataset.title.toLowerCase();
+                const message = notification.dataset.message.toLowerCase();
+
+                let show = true;
+
+                // Status filter
+                if (statusFilter !== 'all' && status !== statusFilter) {
+                    show = false;
+                }
+
+                // Priority filter
+                if (priorityFilter !== 'all' && priority !== priorityFilter) {
+                    show = false;
+                }
+
+                // Search filter
+                if (searchFilter && !title.includes(searchFilter) && !message.includes(searchFilter)) {
+                    show = false;
+                }
+
+                if (show) {
+                    notification.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    notification.style.display = 'none';
+                }
+            });
+
+            // Show/hide no notifications message
+            const noNotifications = document.getElementById('noNotifications');
+            if (visibleCount === 0) {
+                noNotifications.style.display = 'block';
+            } else {
+                noNotifications.style.display = 'none';
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('priorityFilter').value = 'all';
+            document.getElementById('searchFilter').value = '';
+            filterNotifications();
+        }
+
+        // Add event listeners
+        document.getElementById('statusFilter').addEventListener('change', filterNotifications);
+        document.getElementById('priorityFilter').addEventListener('change', filterNotifications);
+        document.getElementById('searchFilter').addEventListener('input', filterNotifications);
+
+        // Initialize filters
+        filterNotifications();
+
+        function openEditNotificationModal(button) {
+            document.getElementById('editNotificationId').value = button.getAttribute('data-id');
+            document.getElementById('editNotificationTitle').value = button.getAttribute('data-title');
+            document.getElementById('editNotificationMessage').value = button.getAttribute('data-message');
+            document.getElementById('editNotificationPriority').value = button.getAttribute('data-priority');
+            var modal = new bootstrap.Modal(document.getElementById('editNotificationModal'));
+            modal.show();
+        }
+    </script>
+</body>
+</html> 

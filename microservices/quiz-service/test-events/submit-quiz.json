@@ -1,0 +1,21 @@
+{
+  "resource": "/quiz/submit",
+  "path": "/quiz/submit",
+  "httpMethod": "POST",
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "queryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourcePath": "/quiz/submit",
+    "httpMethod": "POST",
+    "requestId": "test-request-id",
+    "accountId": "123456789012",
+    "stage": "test"
+  },
+  "body": "{\"patientId\":\"patient@example.com\",\"answers\":{\"1\":4,\"2\":3,\"3\":5,\"4\":2,\"5\":4}}",
+  "isBase64Encoded": false
+}

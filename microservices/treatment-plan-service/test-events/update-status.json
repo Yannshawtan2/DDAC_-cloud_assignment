@@ -1,0 +1,8 @@
+{
+    "httpMethod": "PUT",
+    "path": "/treatment-plans/1/status",
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "body": "{\"status\":\"COMPLETED\"}"
+}

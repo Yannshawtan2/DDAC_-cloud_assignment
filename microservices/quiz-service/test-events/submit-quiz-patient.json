@@ -1,0 +1,8 @@
+{
+  "httpMethod": "POST",
+  "path": "/quiz/submit",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"patientId\": \"patient@email.com\", \"answers\": {\"1\": 4, \"2\": 3, \"3\": 5, \"4\": 2, \"5\": 4}}"
+}

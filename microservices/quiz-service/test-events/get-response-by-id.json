@@ -1,0 +1,23 @@
+{
+  "resource": "/quiz/responses/{id}",
+  "path": "/quiz/responses/1",
+  "httpMethod": "GET",
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "queryStringParameters": null,
+  "pathParameters": {
+    "id": "1"
+  },
+  "stageVariables": null,
+  "requestContext": {
+    "resourcePath": "/quiz/responses/{id}",
+    "httpMethod": "GET",
+    "requestId": "test-request-id",
+    "accountId": "123456789012",
+    "stage": "test"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}

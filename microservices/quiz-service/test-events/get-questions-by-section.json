@@ -1,0 +1,24 @@
+{
+  "resource": "/quiz/questions",
+  "path": "/quiz/questions",
+  "httpMethod": "GET",
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "queryStringParameters": {
+    "section": "Diet",
+    "active": "true"
+  },
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourcePath": "/quiz/questions",
+    "httpMethod": "GET",
+    "requestId": "test-request-id",
+    "accountId": "123456789012",
+    "stage": "test"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}

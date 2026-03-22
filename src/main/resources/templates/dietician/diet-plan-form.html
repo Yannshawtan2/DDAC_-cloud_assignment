@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Diabetes Diet Plan - Dietician Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link th:href="@{/css/dietician-styles.css}" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div th:replace="dietician/sidebar :: dietician-sidebar('diet-plans')"></div>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-plus me-2"></i>Create New Diabetes Diet Plan
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/dietician/diet-plans" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>Diabetes Diet Plan Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/dietician/diet-plans}" th:object="${dietPlan}" method="post">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <label for="title" class="form-label">Diabetes Diet Plan Title *</label>
+                                    <input type="text" class="form-control" id="title" th:field="*{title}" 
+                                           placeholder="e.g., Low-Carb Diabetes Management Plan" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="patientId" class="form-label">Diabetes Patient *</label>
+                                    <select class="form-select" id="patientId" name="patientId" required>
+                                        <option value="">Select Diabetes Patient</option>
+                                        <option th:each="patient : ${patients}" 
+                                                th:value="${patient.id}" 
+                                                th:text="${patient.name}">Patient Name</option>
+                                    </select>
+                                    
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="startDate" class="form-label">Start Date *</label>
+                                    <input type="date" class="form-control" id="startDate" th:field="*{startDate}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="endDate" class="form-label">End Date *</label>
+                                    <input type="date" class="form-control" id="endDate" th:field="*{endDate}" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" th:field="*{description}" 
+                                              rows="3" placeholder="Enter diabetes management goals and diet plan overview"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="dailyCalories" class="form-label">Daily Calories Target</label>
+                                    <input type="number" class="form-control" id="dailyCalories" th:field="*{dailyCalories}" 
+                                           placeholder="e.g., 1800" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="dailyCarbs" class="form-label">Daily Carbs (g)</label>
+                                    <input type="number" class="form-control" id="dailyCarbs" name="dailyCarbs" 
+                                           placeholder="e.g., 150" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status" th:field="*{status}">
+                                        <option value="ACTIVE">Active</option>
+                                        <option value="SUSPENDED">Suspended</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <h5 class="mt-4 mb-3"><i class="fas fa-utensils me-2"></i>Diabetes-Friendly Meal Plans</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="breakfast" class="form-label">Breakfast (Low-GI Options)</label>
+                                    <textarea class="form-control" id="breakfast" th:field="*{breakfast}" 
+                                              rows="4" placeholder="e.g., Oatmeal with berries, Greek yogurt with nuts, whole grain toast with avocado"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="lunch" class="form-label">Lunch (Balanced Portions)</label>
+                                    <textarea class="form-control" id="lunch" th:field="*{lunch}" 
+                                              rows="4" placeholder="e.g., Grilled chicken salad, quinoa bowl with vegetables, lentil soup with whole grain bread"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="dinner" class="form-label">Dinner (Controlled Carbs)</label>
+                                    <textarea class="form-control" id="dinner" th:field="*{dinner}" 
+                                              rows="4" placeholder="e.g., Baked salmon with steamed broccoli, lean beef with sweet potato, tofu stir-fry"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="snacks" class="form-label">Healthy Snacks</label>
+                                    <textarea class="form-control" id="snacks" th:field="*{snacks}" 
+                                              rows="4" placeholder="e.g., Handful of nuts, apple with peanut butter, cucumber with hummus"></textarea>
+                                </div>
+                            </div>
+
+                            <h5 class="mt-4 mb-3"><i class="fas fa-heartbeat me-2"></i>Diabetes Management Information</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="dietaryRestrictions" class="form-label">Dietary Restrictions & Allergies</label>
+                                    <textarea class="form-control" id="dietaryRestrictions" th:field="*{dietaryRestrictions}" 
+                                              rows="3" placeholder="e.g., No refined sugars, gluten-free, dairy intolerance, nut allergies"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="specialInstructions" class="form-label">Blood Sugar Management Notes</label>
+                                    <textarea class="form-control" id="specialInstructions" th:field="*{specialInstructions}" 
+                                              rows="3" placeholder="e.g., Monitor blood glucose before/after meals, avoid high-GI foods, medication timing considerations"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label for="diabetesNotes" class="form-label">Diabetes-Specific Guidelines</label>
+                                    <textarea class="form-control" id="diabetesNotes" name="diabetesNotes" 
+                                              rows="3" placeholder="e.g., Carb counting guidelines, portion control tips, meal timing recommendations, exercise considerations"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary me-3">
+                                        <i class="fas fa-save me-2"></i>Create Diabetes Diet Plan
+                                    </button>
+                                    <a href="/dietician/diet-plans" class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Set default start date to today
+        document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
+        
+        // Set default end date to 30 days from today
+        let endDate = new Date();
+        endDate.setDate(endDate.getDate() + 30);
+        document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+    </script>
+</body>
+</html> 

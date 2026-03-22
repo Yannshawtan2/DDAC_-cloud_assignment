@@ -1,0 +1,23 @@
+{
+  "resource": "/quiz/questions/{id}",
+  "path": "/quiz/questions/1",
+  "httpMethod": "PUT",
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "queryStringParameters": null,
+  "pathParameters": {
+    "id": "1"
+  },
+  "stageVariables": null,
+  "requestContext": {
+    "resourcePath": "/quiz/questions/{id}",
+    "httpMethod": "PUT",
+    "requestId": "test-request-id",
+    "accountId": "123456789012",
+    "stage": "test"
+  },
+  "body": "{\"questionText\":\"How well do you monitor your carbohydrate intake?\",\"description\":\"Updated description for carb monitoring\",\"section\":\"Diet\",\"isActive\":true}",
+  "isBase64Encoded": false
+}

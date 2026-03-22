@@ -1,0 +1,8 @@
+{
+  "httpMethod": "POST",
+  "path": "/diet-plans",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"title\":\"Test User Service Integration\",\"description\":\"Testing that user service validation works correctly\",\"patientId\":4,\"dietitianId\":2,\"dailyCalories\":2000,\"status\":\"ACTIVE\"}"
+}

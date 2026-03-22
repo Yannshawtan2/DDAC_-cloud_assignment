@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Quiz Questions Management - Dietician Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link th:href="@{/css/dietician-styles.css}" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Include shared sidebar -->
+            <div th:replace="dietician/sidebar :: dietician-sidebar('quiz-questions')"></div>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-question-circle me-2"></i>Diabetes Diet Quiz Questions
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/dietician/quiz/questions/new" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>New Question
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-xl-4 col-md-6 mb-4">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Total Questions
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalQuestions}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-question-circle fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            Active Questions
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${activeQuestionCount}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-play-circle fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-md-6 mb-4">
+                        <div class="card border-left-info shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                            Inactive Questions
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" 
+                                             th:text="${inactiveQuestionCount}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-pause-circle fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Filter -->
+                <div class="row mb-4" th:if="${!#lists.isEmpty(allSections)}">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter by Section</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="/dietician/quiz/questions" 
+                                       class="btn btn-sm" 
+                                       th:classappend="${selectedSection == null} ? 'btn-primary' : 'btn-outline-primary'">
+                                        <i class="fas fa-list me-2"></i>All Questions
+                                    </a>
+                                    <a th:each="section : ${allSections}" 
+                                       th:href="@{/dietician/quiz/questions(section=${section})}"
+                                       th:text="${section}"
+                                       class="btn btn-sm" 
+                                       th:classappend="${selectedSection == section} ? 'btn-primary' : 'btn-outline-primary'">
+                                        Section Name
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mb-4" th:if="${#lists.isEmpty(questions)}">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <a href="/dietician/quiz/questions/new" class="btn btn-primary btn-lg w-100">
+                                            <i class="fas fa-plus me-2"></i>Create First Question
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <form method="post" action="/dietician/quiz/questions/init-defaults" class="w-100">
+                                            <button type="submit" class="btn btn-outline-primary btn-lg w-100">
+                                                <i class="fas fa-magic me-2"></i>Create Default Questions with Sections
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Questions List -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Quiz Questions List</h5>
+                        <div th:if="${totalQuestions > 0}" class="text-muted">
+                            <small>Showing <span th:text="${startIndex}">1</span>-<span th:text="${endIndex}">10</span> of <span th:text="${totalQuestions}">25</span> questions</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(questions)}" class="text-center py-4">
+                            <i class="fas fa-question-circle fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Quiz Questions Found</h5>
+                            <p class="text-muted">Start creating diabetes management quiz questions for your patients.</p>
+                            <a href="/dietician/quiz/questions/new" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Create First Question
+                            </a>
+                        </div>
+                        
+                        <div th:if="${!#lists.isEmpty(questions)}" class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Section</th>
+                                        <th>Question</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Created By</th>
+                                        <th>Created Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="question : ${questions}">
+                                        <td>
+                                            <span class="badge bg-info" 
+                                                  th:text="${question.section ?: 'General'}"
+                                                  th:title="${question.section ?: 'No section assigned'}">Diet</span>
+                                        </td>
+                                        <td>
+                                            <h6 class="mb-0" th:text="${question.questionText}">Question text</h6>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted" th:text="${question.description ?: 'No description'}">Description</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge status-badge" 
+                                                  th:classappend="${question.isActive} ? 'bg-success' : 'bg-warning'"
+                                                  th:text="${question.isActive ? 'Active' : 'Inactive'}">Active</span>
+                                        </td>
+                                        <td th:text="${question.createdBy != null ? question.createdBy.name : 'Unknown'}">Dietician Name</td>
+                                        <td>
+                                            <small th:text="${#temporals.format(question.createdAt, 'MMM dd, yyyy')}">Mar 15, 2024</small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/dietician/quiz/questions/{id}(id=${question.id})}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a th:href="@{/dietician/quiz/questions/{id}/edit(id=${question.id})}" 
+                                                   class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form th:action="@{/dietician/quiz/questions/{id}/delete(id=${question.id})}" 
+                                                      method="post" style="display: inline;">
+                                                    <button type="submit" class="btn btn-sm btn-danger"
+                                                            onclick="return confirm('Are you sure you want to delete this question?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination Controls -->
+                        <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-4">
+                            <div class="pagination-info">
+                                <small class="text-muted">
+                                    Page <span th:text="${currentPage + 1}">1</span> of <span th:text="${totalPages}">5</span>
+                                </small>
+                            </div>
+                            
+                            <nav aria-label="Question pagination">
+                                <ul class="pagination pagination-sm mb-0">
+                                    <!-- Previous Button -->
+                                    <li class="page-item" th:classappend="${!hasPrevious} ? 'disabled'">
+                                        <a class="page-link" 
+                                           th:href="@{/dietician/quiz/questions(page=${currentPage - 1}, size=${pageSize}, section=${selectedSection})}"
+                                           th:if="${hasPrevious}"
+                                           id="prevBtn">
+                                            <i class="fas fa-chevron-left"></i> Previous
+                                        </a>
+                                        <span class="page-link" th:unless="${hasPrevious}">
+                                            <i class="fas fa-chevron-left"></i> Previous
+                                        </span>
+                                    </li>
+                                    
+                                    <!-- Page Numbers -->
+                                    <li th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}" 
+                                        class="page-item" 
+                                        th:classappend="${pageNum == currentPage} ? 'active'"
+                                        th:if="${pageNum >= currentPage - 2 and pageNum <= currentPage + 2}">
+                                        <a class="page-link" 
+                                           th:href="@{/dietician/quiz/questions(page=${pageNum}, size=${pageSize}, section=${selectedSection})}"
+                                           th:text="${pageNum + 1}">1</a>
+                                    </li>
+                                    
+                                    <!-- Next Button -->
+                                    <li class="page-item" th:classappend="${!hasNext} ? 'disabled'">
+                                        <a class="page-link" 
+                                           th:href="@{/dietician/quiz/questions(page=${currentPage + 1}, size=${pageSize}, section=${selectedSection})}"
+                                           th:if="${hasNext}"
+                                           id="nextBtn">
+                                            Next <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                        <span class="page-link" th:unless="${hasNext}">
+                                            Next <i class="fas fa-chevron-right"></i>
+                                        </span>
+                                    </li>
+                                </ul>
+                            </nav>
+                            
+                            <!-- Page Size Selector -->
+                            <div class="page-size-selector">
+                                <small class="text-muted me-2">Show:</small>
+                                <select class="form-select form-select-sm" id="pageSizeSelect" style="width: auto; display: inline-block;">
+                                    <option value="5" th:selected="${pageSize == 5}">5</option>
+                                    <option value="10" th:selected="${pageSize == 10}">10</option>
+                                    <option value="20" th:selected="${pageSize == 20}">20</option>
+                                    <option value="50" th:selected="${pageSize == 50}">50</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Keyboard navigation
+            document.addEventListener('keydown', function(event) {
+                if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                    return; // Don't interfere with form inputs
+                }
+                
+                if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    const prevBtn = document.getElementById('prevBtn');
+                    if (prevBtn) {
+                        prevBtn.click();
+                    }
+                } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+                    event.preventDefault();
+                    const nextBtn = document.getElementById('nextBtn');
+                    if (nextBtn) {
+                        nextBtn.click();
+                    }
+                }
+            });
+            
+            // Page size change handler
+            const pageSizeSelect = document.getElementById('pageSizeSelect');
+            if (pageSizeSelect) {
+                pageSizeSelect.addEventListener('change', function() {
+                    const currentUrl = new URL(window.location.href);
+                    currentUrl.searchParams.set('size', this.value);
+                    currentUrl.searchParams.set('page', '0'); // Reset to first page
+                    window.location.href = currentUrl.toString();
+                });
+            }
+            
+                         // Add keyboard navigation hint
+             const hint = document.createElement('div');
+             hint.className = 'alert alert-info alert-dismissible fade show mb-4';
+             hint.innerHTML = `
+                 <i class="fas fa-keyboard me-2"></i>
+                 <strong>Keyboard Navigation:</strong> Use <kbd>←</kbd> <kbd>→</kbd> arrow keys to navigate between pages.
+                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+             `;
+             
+             // Only show hint if there are multiple pages
+             if (document.querySelector('.pagination')) {
+                 const mainContent = document.querySelector('main');
+                 const statsRow = mainContent.querySelector('.row.mb-4');
+                 if (statsRow) {
+                     statsRow.parentNode.insertBefore(hint, statsRow);
+                 }
+             }
+        });
+    </script>
+</body>
+</html> 

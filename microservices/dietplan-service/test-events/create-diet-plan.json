@@ -1,0 +1,8 @@
+{
+  "httpMethod": "POST",
+  "path": "/diet-plans",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"title\":\"Mediterranean Diet Plan\",\"description\":\"A healthy Mediterranean-style diet plan for weight management\",\"patientId\":4,\"dietitianId\":2,\"startDate\":\"2024-01-15\",\"endDate\":\"2024-04-15\",\"breakfast\":\"Greek yogurt with berries and nuts\",\"lunch\":\"Grilled chicken salad with olive oil dressing\",\"dinner\":\"Baked salmon with quinoa and vegetables\",\"snacks\":\"Almonds, fresh fruits\",\"dailyCalories\":1800,\"specialInstructions\":\"Drink plenty of water, avoid processed foods\",\"dietaryRestrictions\":\"No dairy allergies\",\"status\":\"ACTIVE\"}"
+}

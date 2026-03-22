@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Diabetes Quiz Question - Dietician Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link th:href="@{/css/dietician-styles.css}" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Include shared sidebar -->
+            <div th:replace="dietician/sidebar :: dietician-sidebar('quiz-questions')"></div>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-plus-circle me-2"></i>Create New Quiz Question
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <span class="text-muted">Add a new diabetes diet assessment question</span>
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Form -->
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Question Details</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <form th:action="@{/dietician/quiz/questions}" th:object="${question}" method="post">
+                                    <!-- Section Selection -->
+                                    <div class="mb-4">
+                                        <label for="section" class="form-label">
+                                            <i class="fas fa-folder text-primary"></i>
+                                            Section <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="input-group">
+                                                    <select class="form-select" id="sectionDropdown" onchange="handleSectionChange()">
+                                                        <option value="General" th:selected="${question.section == null or question.section == '' or question.section == 'General'}">General</option>
+                                                        <option th:each="existingSection : ${allSections}" 
+                                                                th:value="${existingSection}" 
+                                                                th:text="${existingSection}"
+                                                                th:selected="${question.section == existingSection}">Diet</option>
+                                                        <option value="Diet" th:if="${!#lists.contains(allSections, 'Diet')}">Diet</option>
+                                                        <option value="Meal Planning" th:if="${!#lists.contains(allSections, 'Meal Planning')}">Meal Planning</option>
+                                                        <option value="Physical Activity" th:if="${!#lists.contains(allSections, 'Physical Activity')}">Physical Activity</option>
+                                                        <option value="Sleep Schedule" th:if="${!#lists.contains(allSections, 'Sleep Schedule')}">Sleep Schedule</option>
+                                                        <option value="Blood Sugar Monitoring" th:if="${!#lists.contains(allSections, 'Blood Sugar Monitoring')}">Blood Sugar Monitoring</option>
+                                                        <option value="Medication Management" th:if="${!#lists.contains(allSections, 'Medication Management')}">Medication Management</option>
+                                                        <option value="Stress Management" th:if="${!#lists.contains(allSections, 'Stress Management')}">Stress Management</option>
+                                                        <option value="__CUSTOM__">✏️ Create New Section...</option>
+                                                    </select>
+                                                    <input type="text" 
+                                                           class="form-control d-none" 
+                                                           id="customSectionInput" 
+                                                           placeholder="Enter new section name..."
+                                                           maxlength="100">
+                                                </div>
+                                                <!-- Hidden field that will be submitted -->
+                                                <input type="hidden" id="section" th:field="*{section}" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <button type="button" class="btn btn-outline-info w-100" 
+                                                        onclick="toggleCustomInput()">
+                                                    <i class="fas fa-edit me-2"></i>Custom Input
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            <strong>Select from dropdown</strong> or click "Custom Input" to type a new section name.
+                                        </small>
+                                    </div>
+
+                                    <!-- Question Text -->
+                                    <div class="mb-4">
+                                        <label for="questionText" class="form-label">
+                                            <i class="fas fa-question-circle text-primary"></i>
+                                            Question Text <span class="text-danger">*</span>
+                                        </label>
+                                        <textarea class="form-control" id="questionText" th:field="*{questionText}" 
+                                                 rows="3" maxlength="500" required
+                                                 placeholder="Enter your diabetes diet-related question here..."
+                                                 oninput="updateCharacterCount('questionText', 'questionTextCount', 500)"></textarea>
+                                        <div id="questionTextCount" class="character-count">0/500 characters</div>
+                                        <small class="form-text text-muted">
+                                            <strong>Examples:</strong> "How often do you monitor your carbohydrate intake?" or 
+                                            "How well do you follow portion control guidelines?"
+                                        </small>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div class="mb-4">
+                                        <label for="description" class="form-label">
+                                            <i class="fas fa-info-circle text-primary"></i>
+                                            Description / Context
+                                        </label>
+                                        <textarea class="form-control" id="description" th:field="*{description}" 
+                                                 rows="2" maxlength="1000"
+                                                 placeholder="Provide additional context or guidance for this question..."
+                                                 oninput="updateCharacterCount('description', 'descriptionCount', 1000)"></textarea>
+                                        <div id="descriptionCount" class="character-count">0/1000 characters</div>
+                                        <small class="form-text text-muted">
+                                            Optional: Add context to help patients understand what the question is asking about.
+                                        </small>
+                                    </div>
+
+
+
+                                    <!-- Active Status -->
+                                    <div class="mb-4">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="isActive" 
+                                                   th:field="*{isActive}" checked>
+                                            <label class="form-check-label" for="isActive">
+                                                <i class="fas fa-toggle-on text-success"></i>
+                                                <strong>Active Question</strong>
+                                            </label>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            Only active questions will appear in the patient quiz.
+                                        </small>
+                                    </div>
+
+                                    <!-- Form Actions -->
+                                    <div class="d-flex justify-content-between mt-4">
+                                        <a href="/dietician/quiz/questions" class="btn btn-outline-secondary">
+                                            <i class="fas fa-times me-2"></i>Cancel
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Create Question
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rating Scale Preview -->
+                <div class="row justify-content-center mt-4">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-star text-warning me-2"></i>Rating Scale Preview</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted mb-3">Patients will rate their response using this 1-5 scale:</p>
+                                <div class="row text-center">
+                                    <div class="col">
+                                        <div class="rating-preview-item">
+                                            <div class="rating-number bg-danger">1</div>
+                                            <small>Never / Poor</small>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="rating-preview-item">
+                                            <div class="rating-number bg-warning">2</div>
+                                            <small>Rarely / Fair</small>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="rating-preview-item">
+                                            <div class="rating-number bg-info">3</div>
+                                            <small>Sometimes / Good</small>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="rating-preview-item">
+                                            <div class="rating-number bg-primary">4</div>
+                                            <small>Often / Very Good</small>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="rating-preview-item">
+                                            <div class="rating-number bg-success">5</div>
+                                            <small>Always / Excellent</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updateCharacterCount(textareaId, countId, maxLength) {
+            const textarea = document.getElementById(textareaId);
+            const counter = document.getElementById(countId);
+            const currentLength = textarea.value.length;
+            
+            counter.textContent = `${currentLength}/${maxLength} characters`;
+            
+            if (currentLength > maxLength * 0.9) {
+                counter.style.color = '#dc3545';
+            } else if (currentLength > maxLength * 0.7) {
+                counter.style.color = '#ffc107';
+            } else {
+                counter.style.color = '#6c757d';
+            }
+        }
+
+        function handleSectionChange() {
+            const dropdown = document.getElementById('sectionDropdown');
+            const customInput = document.getElementById('customSectionInput');
+            const hiddenField = document.getElementById('section');
+            
+            if (dropdown.value === '__CUSTOM__') {
+                // Show custom input for new section
+                dropdown.classList.add('d-none');
+                customInput.classList.remove('d-none');
+                customInput.focus();
+                customInput.value = '';
+                hiddenField.value = '';
+            } else if (dropdown.value !== '') {
+                // Use selected dropdown value
+                hiddenField.value = dropdown.value;
+                customInput.classList.add('d-none');
+                dropdown.classList.remove('d-none');
+            } else {
+                // No selection
+                hiddenField.value = '';
+            }
+        }
+
+        function toggleCustomInput() {
+            const dropdown = document.getElementById('sectionDropdown');
+            const customInput = document.getElementById('customSectionInput');
+            const hiddenField = document.getElementById('section');
+            
+            if (customInput.classList.contains('d-none')) {
+                // Switch to custom input mode
+                dropdown.classList.add('d-none');
+                customInput.classList.remove('d-none');
+                customInput.focus();
+                customInput.value = hiddenField.value || '';
+            } else {
+                // Switch back to dropdown mode
+                customInput.classList.add('d-none');
+                dropdown.classList.remove('d-none');
+                
+                // Try to select the current value in dropdown
+                const currentValue = customInput.value || hiddenField.value;
+                if (currentValue) {
+                    // Check if the value exists in dropdown
+                    const optionExists = Array.from(dropdown.options).some(option => option.value === currentValue);
+                    if (optionExists) {
+                        dropdown.value = currentValue;
+                    } else {
+                        dropdown.value = '';
+                    }
+                }
+                hiddenField.value = dropdown.value;
+            }
+        }
+
+        // Handle custom input changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const customInput = document.getElementById('customSectionInput');
+            const hiddenField = document.getElementById('section');
+            const dropdown = document.getElementById('sectionDropdown');
+            
+            // Update hidden field when custom input changes
+            customInput.addEventListener('input', function() {
+                hiddenField.value = this.value;
+            });
+            
+            // Handle Enter key in custom input
+            customInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    toggleCustomInput(); // Switch back to dropdown mode
+                }
+            });
+            
+            // Initialize the form based on existing value
+            const existingValue = hiddenField.value;
+            if (existingValue) {
+                const optionExists = Array.from(dropdown.options).some(option => option.value === existingValue);
+                if (optionExists) {
+                    dropdown.value = existingValue;
+                } else {
+                    // Value doesn't exist in dropdown, show as custom input
+                    dropdown.classList.add('d-none');
+                    customInput.classList.remove('d-none');
+                    customInput.value = existingValue;
+                }
+            } else {
+                // No existing value, set "General" as default
+                dropdown.value = 'General';
+                hiddenField.value = 'General';
+            }
+        });
+
+        // Initialize character counts
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCharacterCount('questionText', 'questionTextCount', 500);
+            updateCharacterCount('description', 'descriptionCount', 1000);
+        });
+    </script>
+    
+    <style>
+        .character-count {
+            font-size: 0.85em;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+        
+        .rating-preview-item {
+            padding: 1rem;
+        }
+        
+        .rating-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 0 auto 0.5rem;
+        }
+    </style>
+</body>
+</html> 

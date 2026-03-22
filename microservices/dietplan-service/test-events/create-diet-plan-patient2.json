@@ -1,0 +1,8 @@
+{
+  "httpMethod": "POST",
+  "path": "/diet-plans",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"title\":\"Weight Loss Diet Plan\",\"description\":\"A comprehensive weight loss plan for patient lerk ann\",\"patientId\":11,\"dietitianId\":2,\"startDate\":\"2024-02-01\",\"endDate\":\"2024-05-01\",\"breakfast\":\"Oatmeal with fresh fruits\",\"lunch\":\"Grilled fish with vegetables\",\"dinner\":\"Lean protein with steamed broccoli\",\"snacks\":\"Raw vegetables, nuts\",\"dailyCalories\":1600,\"specialInstructions\":\"Avoid sugary drinks, exercise 30 minutes daily\",\"dietaryRestrictions\":\"No processed foods\",\"status\":\"ACTIVE\"}"
+}

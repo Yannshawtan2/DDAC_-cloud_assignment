@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Doctor Dashboard</title>
+    <!-- Bootstrap Icons for user icon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <style>
+        .container {
+            display: flex;
+            height: 100vh;
+            position: relative;
+        }
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3);
+            display: none;
+            z-index: 150;
+        }
+        .container.sidebar-visible .overlay {
+            display: block;
+        }
+        .sidebar {
+            width: 220px;
+            background-color: #D1E9F6;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 200;
+            font-family: 'Amasis MT Pro Medium', serif;
+        }
+        .container.sidebar-visible .sidebar {
+            transform: translateX(0);
+        }
+        .headerTitle {
+            display: flex;
+            align-items: center;
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+        .sidebar ul { list-style: none; padding: 0; margin: 0; }
+        .sidebar ul li { margin: 1rem 0; }
+        .link {
+            color: #333;
+            text-decoration: none;
+            padding: 8px;
+            border-radius: 4px;
+            display: block;
+            font-family: 'Amasis MT Pro Medium', serif;
+        }
+        .link:hover { background-color: #B8DFFB; }
+        .mainContent {
+            flex: 1;
+            margin-left: 0;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left 0.3s ease;
+        }
+        .container.sidebar-visible .mainContent {
+            margin-left: 260px;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            background-color: #F6EACB;
+            padding: 0 20px;
+            height: 64px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 0.5rem;
+            z-index: 100;
+        }
+        .toggleBtn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            margin-right: 16px;
+        }
+        .pageTitle { flex: 1; font-size: 1.25rem; font-weight: 600; color: #333; }
+        .userIcon {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #333;
+        }
+        .content {
+            padding: 20px 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            background-color: #fff;
+            flex: 1;
+            overflow-y: auto;
+            justify-content: center;
+        }
+        .card {
+            text-decoration: none;
+            color: inherit;
+            background-color: #F1D3CE;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .card:nth-child(2) { background-color: #EECAD5; }
+        .card:nth-child(3) { background-color: #fff; border: 1px solid #ddd; }
+        .card h2 {
+            margin: 0 0 12px;
+            font-size: 1.1rem;
+            color: #333;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+            min-height: 48px;
+        }
+        .card p { margin: 0; color: #555; }
+
+        .user-menu-container {
+        position: relative;
+        display: inline-block;
+        }
+
+        #userIcon {
+        font-size: 24px;
+        cursor: pointer;
+        }
+
+        .dropdown-menu {
+        position: absolute;
+        top: 35px;
+        right: 0;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        display: none;
+        z-index: 999;
+        min-width: 120px;
+        }
+
+        .dropdown-menu button {
+        width: 100%;
+        padding: 10px 16px;
+        background-color: transparent;
+        border: none;
+        text-align: left;
+        font-size: 14px;
+        cursor: pointer;
+        }
+
+        .dropdown-menu button:hover {
+        background-color: #f0f0f0;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container" id="dashboardContainer">
+        <div class="overlay" onclick="toggleSidebar()"></div>
+            <aside class="sidebar">
+                <h2 class="headerTitle">
+                    <i class="bi bi-hospital icon-hospital"></i> DOCTOR
+                </h2>
+                <ul>
+                    <!-- Dashboard link with fallback href for static preview and Thymeleaf th:href -->
+                    <li><a href="/src/main/resources/templates/doctor/doctor-dashboard.html" th:href="@{/doctor/dashboard}" class="link">DASHBOARD</a></li>
+                    <li><a href="/src/main/resources/templates/doctor/treatment-plans.html" th:href="@{/doctor/treatment-plans}" class="link">TREATMENT PLAN MANAGEMENT</a></li>
+                    <li><a href="/src/main/resources/templates/doctor/appointmentChecking.html" th:href="@{/doctor/appointment}" class="link">APPOINTMENT CHECKING</a></li>
+                    <li><a href="/src/main/resources/templates/doctor/event-ads.html" th:href="@{/event-ads}" class="link">EVENT ADVERTISING MANAGEMENT</a></li>
+                    <li><a href="/src/main/resources/templates/doctor/events-list.html" th:href="@{/events-list}" class="link">EVENT NEWS</a></li>
+                </ul>  
+            </aside>
+        <div class="mainContent">
+            <header class="navbar">
+                <button class="toggleBtn" onclick="toggleSidebar()">&#9776;</button>
+                <h1 class="pageTitle">DASHBOARD</h1>
+                <!-- user icon on the right -->
+                <div class="user-menu-container">
+                    <i class="bi bi-person-circle userIcon" id="userIcon"></i>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <form action="/logout" method="post" id="logoutForm">
+                            <button type="button" onclick="submitLogout()">Logout</button>
+                        </form>
+                    </div>
+                </div>
+            </header>
+            <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080; min-width: 350px;">
+                    <div th:each="notification : ${notifications}" th:if="${notification.active}" class="toast show mb-2" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 300px;">
+                        <div class="toast-header">
+                            <span th:class="'badge me-2 priority-' + ${#strings.toLowerCase(notification.priority)}" th:text="${notification.priority}"></span>
+                            <strong class="me-auto" th:text="${notification.title}"></strong>
+                            <small th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}"></small>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body" th:text="${notification.message}"></div>
+                    </div>
+            </div>
+            <section class="content">
+                <a href="/src/main/resources/templates/doctor/treatment-plans-list.html" th:href="@{/doctor/treatment-plans}" class="card">
+                    <h2>TREATMENT PLAN MANAGEMENT</h2>
+                    <p>Create, view, update and delete treatment plans here.</p>
+                </a>
+                <a href="/src/main/resources/templates/doctor/appointmentChecking.html" th:href="@{/doctor/appointment}" class="card">
+                    <h2>APPOINTMENT CHECKING</h2>
+                    <p>Attach diagnostic notes to the appointment.</p>
+                </a>
+                <a href="/src/main/resources/templates/doctor/event-ads.html" th:href="@{/event-ads}" class="card">
+                    <h2>EVENT ADVERTISING MANAGEMENT</h2>
+                    <p>Create, view and delete campaign sharing ads.</p>
+                </a>              
+                <a href="/src/main/resources/templates/doctor/events-list.html" th:href="@{/events-list}" class="card">
+                    <h2>EVENT NEWS</h2>
+                    <p>View event news.</p>
+                </a>
+            </section>
+        </div>
+    </div>
+    <script>
+        const container = document.getElementById('dashboardContainer');
+        function toggleSidebar() {
+            container.classList.toggle('sidebar-visible');
+        }
+
+        const userIcon = document.getElementById("userIcon");
+        const dropdownMenu = document.getElementById("dropdownMenu");
+
+        userIcon.addEventListener("click", () => {
+            dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+        });
+
+        window.addEventListener("click", (e) => {
+            if (!userIcon.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.style.display = "none";
+            }
+        });
+
+        function submitLogout() {
+            const confirmLogout = confirm("Are you sure you want to log out?");
+            if (confirmLogout) {
+                document.getElementById("logoutForm").submit();
+            }
+        }
+    </script>
+</body>
+</html>

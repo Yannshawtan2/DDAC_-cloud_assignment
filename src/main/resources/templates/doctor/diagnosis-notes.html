@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Diagnostic Notes</title>    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <style>
+        /* General Body Styling for a clean white background */
+        body {
+            background-color: #F8F9FA; /* A very light grey, almost white */
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        /* container & overlay */
+        .container { display: flex; height: 100vh; position: relative; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); display: none; z-index: 150; }
+        .container.sidebar-visible .overlay { display: block; }
+        /* sidebar */
+        .sidebar {
+            width: 220px;
+            background-color: #D1E9F6;
+            padding: 20px;
+            position: fixed; top: 0; left: 0; height: 100%;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 200;
+            font-family: 'Amasis MT Pro Medium', serif;
+        }
+        .container.sidebar-visible .sidebar { transform: translateX(0); }
+        .headerTitle {
+            display: flex; align-items: center;
+            color: #333; font-size: 1.5rem;
+            margin-bottom: 1rem; padding-bottom: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+        .headerTitle .bi { margin-right: 8px; }
+        .headerIcon { width:24px; height:24px; stroke:#333; margin-right:8px; }
+        .sidebar ul { list-style: none; padding: 0; margin: 0; }
+        .sidebar ul li { margin: 1rem 0; }
+        .link {
+            display: block; padding: 8px; border-radius: 4px;
+            font-family: 'Amasis MT Pro Medium', serif;
+            color: #333; text-decoration: none;
+        }
+        .link:hover { background-color: #B8DFFB; }
+        /* main content */
+        .mainContent {
+            flex: 1; margin-left: 0;
+            display: flex; flex-direction: column;
+            transition: margin-left 0.3s ease;
+        }
+        .container.sidebar-visible .mainContent { margin-left: 260px; }
+        /* navbar */
+        .navbar {
+            display: flex; align-items: center;
+            background-color: #F6EACB;
+            padding: 0 20px; height: 64px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 0.5rem; z-index: 100;
+        }
+        .toggleBtn { background: none; border: none; cursor: pointer; font-size: 1.5rem; margin-right: 16px; }
+        .pageTitle { flex: 1; font-size: 1.25rem; font-weight: 600; color: #333; }
+        .userIcon { font-size: 1.8rem; cursor: pointer; color: #333; }
+
+        .user-menu-container {
+        position: relative;
+        display: inline-block;
+        }
+
+        #userIcon {
+        font-size: 24px;
+        cursor: pointer;
+        }
+
+        .dropdown-menu {
+        position: absolute;
+        top: 35px;
+        right: 0;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        display: none;
+        z-index: 999;
+        min-width: 120px;
+        }
+
+        .dropdown-menu button {
+        width: 100%;
+        padding: 10px 16px;
+        background-color: transparent;
+        border: none;
+        text-align: left;
+        font-size: 14px;
+        cursor: pointer;
+        }
+
+        .dropdown-menu button:hover {
+        background-color: #f0f0f0;
+        }   
+
+        /* Content & Table */
+        .content { padding:20px; background:#fff; flex:1; overflow:auto; }
+        .table { width:100%; border-collapse:collapse; }
+        .table th, .table td { border:1px solid #ddd; padding:12px; text-align:left; }
+        .table th { background:#D1E9F6; }
+        .table tr:nth-child(even) { background:#f9f9f9; }
+        .table tr.selectedRow { background:#CDEFFB; }
+        /* Modal */
+        .modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:24px; box-shadow:0 4px 12px rgba(0,0,0,0.2); border-radius:8px; z-index:300; width:600px; max-width:90vw; max-height:90vh; overflow-y:auto; }
+        .modal.show { display:block; }
+        .modal .close { float:right; font-size:1.5rem; cursor:pointer; }
+        .form-group { margin:12px 0; }
+        .form-group label { display:block; margin-bottom:4px; }
+        .form-group input, .form-group textarea { width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; }
+            
+        /* Button styles */
+        .btn-action {
+            background-color: #D1E9F6;
+            border: none;
+            color: #333;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .btn-action:hover {
+            background-color: #B8DFFB;
+        }
+
+        .btn-custom {
+            background-color: #D1E9F6;
+            border: 1px solid #D1E9F6;
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .btn-custom:hover {
+            background-color: #B8DFFB;
+        }
+        
+        /* Card styling for patient info box */
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        .card-body div {
+            margin-bottom: 8px;
+        }
+        .card-body div:last-child {
+            margin-bottom: 0;
+        }
+
+        .tools { display: flex; justify-content: center; margin: 20px 0;}
+        .tools button {
+        margin: 0 0.2rem; /* 上下 0，左右 1rem */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container" id="notesContainer">
+        <div class="overlay" onclick="toggleSidebar()"></div>
+            <aside class="sidebar">
+                <h2 class="headerTitle"><i class="bi bi-hospital"></i> DOCTOR</h2>
+                <ul>
+                    <li><a href="/src/main/resources/templates/doctor/doctor-dashboard.html" th:href="@{/doctor/dashboard}" class="link">DASHBOARD</a></li>
+                    <li><a href="/src/main/resources/templates/doctor/treatment-plans-list.html" th:href="@{/doctor/treatment-plans}" class="link">TREATMENT PLAN MANAGEMENT</a></li>
+                    <li><a href="/src/main/resources/templates/doctor/appointmentChecking.html" th:href="@{/doctor/appointment}" class="link">APPOINTMENT CHECKING</a></li>
+                    <li><a href="/src/main/resources/templates/doctor/event-ads.html" th:href="@{/event-ads}" class="link">EVENT ADVERTISING MANAGEMENT</a></li>
+                    <li><a href="/src/main/resources/templates/doctor/events-list.html" th:href="@{/events-list}" class="link">EVENT NEWS</a></li>
+                </ul>
+            </aside>
+
+            <div class="mainContent">
+            <header class="navbar">
+                <button class="toggleBtn" onclick="toggleSidebar()">&#9776;</button>
+                <span class="pageTitle">Diagnostic Notes</span>
+                <div class="user-menu-container">
+                    <i class="bi bi-person-circle userIcon" id="userIcon"></i>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <form action="/logout" method="post" id="logoutForm">
+                            <button type="button" onclick="submitLogout()">Logout</button>
+                        </form>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Appointments Table -->
+            <section class="content">
+                <div th:if="${selectedAppointmentId == null}">
+                    <h3 style="text-align: center; padding: 50px 0;">Please select an appointment to write a diagnosis note.</h3>
+                </div>
+                <div th:if="${selectedAppointmentId != null}">
+                    <h2 style="margin-bottom: 20px; color: #555;">Appointment & Patient Information</h2>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <strong>Patient Name:</strong> <span th:text="${patientUser.name}"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <strong>Blood Pressure:</strong> <span th:text="${patientData.bloodPressure}"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <strong>Blood Glucose Level:</strong> <span th:text="${patientData.bloodGlucoseLevel}"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <strong>Weight:</strong> <span th:text="${patientData.weight}"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <strong>Height:</strong> <span th:text="${patientData.height}"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <strong>Date:</strong> <span th:text="${selectedAppointment.date}"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <strong>Time:</strong> <span th:text="${selectedAppointment.time}"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <strong>Reason:</strong> <span th:text="${selectedAppointment.reason}"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <form id="diagnosisNoteForm">
+                        <div class="mb-3">
+                            <label for="diagnosisNote" class="form-label" style="font-weight: bold; margin-bottom: 8px; display: block;">Diagnosis Note</label>
+                            <textarea class="form-control" id="diagnosisNote" name="diagnosisNote" rows="8" th:text="${diagnosisNote.diagnosisNote}" style="border-radius: 6px; border: 1px solid #ccc; padding: 10px; width: 100%; box-sizing: border-box;"></textarea>
+                        </div>
+                        <button type="button" class="btn btn-success" onclick="saveDiagnosisNote()" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-right: 10px;">Save</button>
+                        <button type="button" class="btn btn-danger ms-2" onclick="confirmDeleteDiagnosisNote()" style="background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px;">Delete</button>
+                    </form>
+                </div>
+            </section>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteDiagnosisNoteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-center">
+                            <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                            Confirm Deletion
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-center">Are you sure you want to delete this diagnosis note? </p>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-center">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" onclick="deleteDiagnosisNote()">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal       = document.getElementById('dnModal');
+            const apptIdInput = document.getElementById('modalApptId');
+            const closeBtn    = document.getElementById('modalCloseBtn');
+            const saveBtn     = document.getElementById('modalSaveBtn');
+            const editBtn     = document.getElementById('editBtn');
+            const deleteBtn   = document.getElementById('deleteBtn');
+            const notesBody   = document.getElementById('notesTable').querySelector('tbody');
+            let selectedNoteId = null;
+
+            // Load Table 2
+            function loadNotes() {
+                fetch('/api/diagnosis-notes')
+                .then(r => r.json())
+                .then(list => {
+                    notesBody.innerHTML = '';
+                    list.forEach(d => {
+                    const age = Math.floor((Date.now() - new Date(d.appointmentDate)) / (365*24*60*60*1000));
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${d.name}</td>
+                        <td>${d.foreignId}</td>
+                        <td>${d.age}</td>
+                        <td>${d.gender}</td>
+                        <td>${d.diagnosisNote}</td>
+                    `;
+                    tr.addEventListener('click', () => {
+                        notesBody.querySelectorAll('tr').forEach(r => r.classList.remove('selectedRow'));
+                        tr.classList.add('selectedRow');
+                        selectedNoteId = d.id;
+                        editBtn.disabled = false;
+                        deleteBtn.disabled = false;
+                    });
+                    notesBody.appendChild(tr);
+                    });
+                    editBtn.disabled = true;
+                    deleteBtn.disabled = true;
+                });
+            }
+            loadNotes();
+
+            // Table 1 row highlight
+            document.querySelectorAll('#apptTable tbody tr')
+            .forEach(row => row.addEventListener('click', () => {
+                document.querySelectorAll('#apptTable tbody tr')
+                .forEach(r => r.classList.remove('selectedRow'));
+                row.classList.add('selectedRow');
+            }));
+
+            // Confirm: open modal for new note
+            document.querySelectorAll('.confirm-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const id = btn.getAttribute('data-id');
+                apptIdInput.value = id;
+                fetch(`/api/appointments/${id}`)
+                .then(r => r.json())
+                .then(d => {
+                    document.getElementById('modalName').value   = d.name;
+                    document.getElementById('modalAge').value   = d.age;
+                    document.getElementById('modalGender').value = d.gender;
+                    document.getElementById('modalDate').value   = d.appointmentDate;
+                    // document.getElementById('modalTime').value   = d.appointmentTime;
+                    document.getElementById('modalFid').value    = d.foreignId;
+                    document.getElementById('modalHeight').value = d.height;
+                    document.getElementById('modalWeight').value = d.weight;
+                    document.getElementById('modalSugar').value  = d.bloodSugarIndex;
+                    document.getElementById('modalNote').value   = '';
+                    modal.classList.add('show');
+                });
+            });
+            });
+
+            // Close modal
+            closeBtn.addEventListener('click', () => modal.classList.remove('show'));
+
+            // Save new or updated note
+            saveBtn.addEventListener('click', () => {
+            const appointmentId = +apptIdInput.value;
+            const diagnosisNote = document.getElementById('modalNote').value;
+            // Determine POST vs PUT based on selectedNoteId
+            const method = selectedNoteId ? 'PUT' : 'POST';
+            const url = selectedNoteId
+                ? `/api/diagnosis-notes/${selectedNoteId}`
+                : '/api/diagnosis-notes';
+            const body = selectedNoteId
+                ? JSON.stringify({ diagnosisNote })
+                : JSON.stringify({ appointmentId, diagnosisNote });
+
+            fetch(url, {
+                method,
+                headers: {'Content-Type':'application/json'},
+                body
+            })
+            .then(() => {
+                modal.classList.remove('show');
+                selectedNoteId = null;
+                loadNotes();
+            })
+            .catch(() => alert('Save failed'));
+            });
+
+            // Edit existing note
+            editBtn.addEventListener('click', () => {
+            fetch(`/api/diagnosis-notes/${selectedNoteId}`)
+                .then(r => r.json())
+                .then(d => {
+                apptIdInput.value = d.appointment.id;
+                document.getElementById('modalName').value   = d.name;
+                document.getElementById('modalAge').value   = d.age;
+                document.getElementById('modalGender').value = d.gender;
+                document.getElementById('modalDate').value   = d.appointmentDate;
+                // document.getElementById('modalTime').value   = d.appointmentTime;
+                document.getElementById('modalFid').value    = d.foreignId;
+                document.getElementById('modalHeight').value = d.height;
+                document.getElementById('modalWeight').value = d.weight;
+                document.getElementById('modalSugar').value  = d.bloodSugarIndex;
+                document.getElementById('modalNote').value   = d.diagnosisNote;
+                modal.classList.add('show');
+                });
+            });
+
+            // Delete existing note
+            deleteBtn.addEventListener('click', () => {
+            if (confirm('Delete this note?')) {
+                fetch(`/api/diagnosis-notes/${selectedNoteId}`, { method:'DELETE' })
+                .then(() => loadNotes());
+            }
+            });
+        });
+
+        // Sidebar & user menu
+        function toggleSidebar() {
+        document.getElementById('notesContainer').classList.toggle('sidebar-visible');
+        }
+        window.toggleSidebar = toggleSidebar;
+        const userIcon = document.getElementById('userIcon'),
+            dropdownMenu = document.getElementById('dropdownMenu');
+        userIcon.addEventListener('click', () =>
+        dropdownMenu.style.display = dropdownMenu.style.display==='block'?'none':'block'
+        );
+        window.addEventListener('click', e => {
+        if (!userIcon.contains(e.target) && !dropdownMenu.contains(e.target))
+            dropdownMenu.style.display='none';
+        });
+        window.logout = () => {
+            const confirmLogout = confirm("Are you sure you want to log out?");
+            if (confirmLogout) {
+                window.location.href = "/login";
+            }
+        }
+        
+        function submitLogout() {
+            const confirmLogout = confirm("Are you sure you want to log out?");
+            if (confirmLogout) {
+                document.getElementById("logoutForm").submit();
+            }
+        }
+
+        function saveDiagnosisNote() {
+            const appointmentId = new URLSearchParams(window.location.search).get('appointmentId');
+            const diagnosisNoteContent = document.getElementById('diagnosisNote').value;
+
+            fetch(`/api/diagnosis-notes/save?appointmentId=${appointmentId}&diagnosisNote=${encodeURIComponent(diagnosisNoteContent)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Diagnosis note saved successfully!');
+                    window.location.reload();
+                } else {
+                    response.text().then(text => alert('Failed to save diagnosis note: ' + text));
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        function confirmDeleteDiagnosisNote() {
+            var modal = new bootstrap.Modal(document.getElementById('deleteDiagnosisNoteModal'));
+            modal.show();
+        }
+        function deleteDiagnosisNote() {
+            const appointmentId = new URLSearchParams(window.location.search).get('appointmentId');
+            fetch(`/api/diagnosis-notes/delete?appointmentId=${appointmentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Diagnosis note deleted successfully!');
+                    window.location.reload();
+                } else {
+                    response.text().then(text => alert('Failed to delete diagnosis note: ' + text));
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
+
+

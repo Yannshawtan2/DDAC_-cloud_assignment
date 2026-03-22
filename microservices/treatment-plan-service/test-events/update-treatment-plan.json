@@ -1,0 +1,8 @@
+{
+    "httpMethod": "PUT",
+    "path": "/treatment-plans/1",
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "body": "{\"title\":\"Updated Diabetes Management Plan\",\"description\":\"Updated comprehensive treatment plan for Type 2 diabetes management\",\"medication\":\"Metformin Extended Release\",\"dosage\":\"1000mg\",\"frequency\":\"Once daily\",\"instructions\":\"Take with evening meal. Monitor blood sugar levels twice daily.\",\"notes\":\"Patient is responding well to treatment. Continue current regimen.\"}"
+}
